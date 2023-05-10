@@ -1,0 +1,34 @@
+server:
+  port: 8888
+# ?????
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/hotel_system?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8&useSSL=false&tinyInt1isBit=true
+    hikari:
+      minimum-idle: 10 # ????????
+      maximum-pool-size: 10 # ????????????10
+      idle-timeout: 120000 # ??????????
+      connection-timeout: 30000 # ?????????
+      connection-test-query: Select 1
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 379533177@qq.com
+    password: ryjxbuztvacacahj  # 需要申请到的授权码
+    properties:
+      mail:
+        debug: true
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+# 用户头像存放路径
+user:
+  icon: /home/hotel/file/

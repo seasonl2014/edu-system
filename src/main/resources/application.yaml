@@ -1,0 +1,37 @@
+# ?????
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: MyNewPass5!
+    url: jdbc:mysql://192.168.0.40:3306/edu_system?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    hikari:
+      minimum-idle: 10 # ????????
+      maximum-pool-size: 10 # ????????????10
+      idle-timeout: 120000 # ??????????
+      connection-timeout: 30000 # ?????????
+      connection-test-query: Select 1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 379533177@qq.com
+    password: ryjxbuztvacacahj  # 需要申请到的授权码
+    properties:
+      mail:
+        debug: true
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+# 用户头像存放路径
+user:
+  icon: E:\\edu-mangement-system\\
+
+# ip2region
+ip2region:
+  enabled: true
+  dbfile: data/ip2region.db
