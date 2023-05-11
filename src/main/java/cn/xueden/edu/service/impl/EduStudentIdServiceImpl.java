@@ -13,6 +13,7 @@ import cn.xueden.utils.XuedenUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * @version:1.0
  */
 @Service
+@Transactional(readOnly = true)
 public class EduStudentIdServiceImpl implements IEduStudentIdService {
 
     private final EduStudentIdRepository eduStudentIdRepository;
@@ -50,6 +52,7 @@ public class EduStudentIdServiceImpl implements IEduStudentIdService {
      * @param studentIdModel
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addStudentId(StudentIdModel studentIdModel) {
         List<String> list = XuedenUtil.startFormat(studentIdModel.getStartNo(),studentIdModel.getNumber());
         List<EduStudentId> eduStudentIdList = list.stream().map(item-> {

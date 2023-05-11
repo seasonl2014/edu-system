@@ -8,4 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @author Administrator
  */
 public interface EduStudentIdRepository extends JpaRepository<EduStudentId, Long>, JpaSpecificationExecutor<EduStudentId> {
+
+    /**
+     * 根据状态获取一条记录
+     * @param Status
+     * @return
+     */
+    EduStudentId findFirstByStatus(int Status);
 }

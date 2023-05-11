@@ -42,14 +42,14 @@ public class EduStudent extends BaseEntity {
     /**
      * 学生姓名
      */
-    @Column(name = "name",nullable = false)
+    @Column(name = "name")
     private String name;
 
 
     /**
      * 性别
      */
-    @Column(name = "sex",nullable = false)
+    @Column(name = "sex")
     private String sex;
 
     /**
@@ -61,7 +61,7 @@ public class EduStudent extends BaseEntity {
     /**
      * 邮箱
      */
-    @Column(name = "email",nullable = false)
+    @Column(name = "email")
     private String email;
 
     /**
@@ -75,6 +75,12 @@ public class EduStudent extends BaseEntity {
      */
     @Column(name = "wx_open_id")
     private String wxOpenId;
+
+    /**
+     * 状态，1表示启用，0表示禁用
+     */
+    @Column(name = "status",nullable = false)
+    private Integer status;
 
 
 

@@ -51,12 +51,8 @@ public class EduStudentController {
      */
     @PostMapping
     public BaseResult addStudent(@RequestBody EduStudent student){
-        boolean result = studentService.addStudent(student);
-        if(result){
-            return BaseResult.success("添加成功");
-        }else {
-            return BaseResult.fail("添加失败");
-        }
+        studentService.addStudent(student);
+        return BaseResult.success("添加成功");
     }
 
     /**

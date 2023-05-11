@@ -26,7 +26,7 @@ public interface IEduStudentService {
      * @param student
      * @return
      */
-    boolean addStudent(EduStudent student);
+    void addStudent(EduStudent student);
 
     /**
      * 根据ID获取学生详情信息
