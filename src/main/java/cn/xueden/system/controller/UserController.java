@@ -10,10 +10,7 @@ import cn.xueden.system.service.ISysUserService;
 import cn.xueden.system.service.dto.UserQueryCriteria;
 
 import cn.xueden.system.vo.ModifyPwdModel;
-import cn.xueden.utils.HutoolJWTUtil;
-import cn.xueden.utils.NativeFileUtil;
-import cn.xueden.utils.PageVo;
-import cn.xueden.utils.XuedenUtil;
+import cn.xueden.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +24,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**功能描述：系统用户前端控制器
  * @author:梁志杰
@@ -279,6 +278,18 @@ public class UserController {
     }
 
 
+    @EnableSysLog("【后台】获取所有未开通讲师的会员信息")
+    @GetMapping("/all")
+    public BaseResult getAll(){
+        List<Map<String,Object>> list = sysUserService.queryAllUserNotTeacher();
+        List<ResultVo> resultVoList = list.stream().map(temp-> {
+            ResultVo obj = new ResultVo();
+            obj.setName(temp.get("username").toString());
+            obj.setId(temp.get("id")!=null?Long.parseLong(temp.get("id").toString()):null);
+            return obj;
+        }).collect(Collectors.toList());
+        return BaseResult.success(resultVoList);
+    }
 
 
 

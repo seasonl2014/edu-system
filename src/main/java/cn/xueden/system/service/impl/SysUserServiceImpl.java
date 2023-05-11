@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+
 /**功能描述：系统用户业务实现类
  * @author:梁志杰
  * @date:2023/1/27
@@ -121,5 +124,14 @@ public class SysUserServiceImpl implements ISysUserService {
             sysUserRepository.save(dbSysUser);
             return true;
         }
+    }
+
+    /**
+     * 获取所有未开通讲师的会员信息
+     * @return
+     */
+    @Override
+    public List<Map<String,Object>> queryAllUserNotTeacher() {
+        return sysUserRepository.queryAllUserNotTeacher();
     }
 }

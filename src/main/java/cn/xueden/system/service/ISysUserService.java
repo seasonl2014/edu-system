@@ -6,6 +6,9 @@ import cn.xueden.system.service.dto.UserQueryCriteria;
 import cn.xueden.system.vo.ModifyPwdModel;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+import java.util.Map;
+
 /**功能描述：系统用户业务接口
  * @author:梁志杰
  * @date:2023/1/27
@@ -56,4 +59,10 @@ public interface ISysUserService {
      * @return
      */
     boolean updatePwd(ModifyPwdModel modifyPwdModel);
+
+    /**
+     * 获取所有未开通讲师的会员信息
+     * @return
+     */
+    List<Map<String,Object>> queryAllUserNotTeacher();
 }
