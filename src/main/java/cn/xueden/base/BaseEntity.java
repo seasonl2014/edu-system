@@ -64,7 +64,7 @@ public class BaseEntity implements Serializable {
     /**
      * 所属网站
      */
-    @Column(name = "website",nullable = false)
+    @Column(name = "website")
     private String website;
 
     /**

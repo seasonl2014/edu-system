@@ -39,9 +39,10 @@ public class EduStudentIdController {
         return new ResponseEntity<>(eduStudentIdService.getList(queryCriteria,pageable), HttpStatus.OK);
     }
 
+    @EnableSysLog("【后台】生成学生学号")
     @PostMapping
-    public BaseResult addStudent(@RequestBody StudentIdModel studentIdModel){
-        eduStudentIdService.addStudent(studentIdModel);
-        return BaseResult.success("添加成功");
+    public BaseResult addStudentId(@RequestBody StudentIdModel studentIdModel){
+        eduStudentIdService.addStudentId(studentIdModel);
+        return BaseResult.success("生成成功");
     }
 }

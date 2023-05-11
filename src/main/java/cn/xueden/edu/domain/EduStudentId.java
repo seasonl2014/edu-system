@@ -19,8 +19,14 @@ public class EduStudentId {
      * 主键
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "student_id",nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id",nullable = false)
+    private Long id;
+
+    /**
+     * 学号
+     */
+    @Column(name = "student_id",nullable = false,unique = true)
     private Long studentId;
 
     /**

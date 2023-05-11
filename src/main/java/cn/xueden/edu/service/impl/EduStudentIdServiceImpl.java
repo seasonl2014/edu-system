@@ -5,11 +5,17 @@ import cn.xueden.edu.domain.EduStudentId;
 import cn.xueden.edu.repository.EduStudentIdRepository;
 import cn.xueden.edu.service.IEduStudentIdService;
 import cn.xueden.edu.service.dto.EduStudentIdQueryCriteria;
+import cn.xueden.edu.vo.StudentIdModel;
+import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
+import cn.xueden.utils.XuedenUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**功能描述：学生学号业务接口实现类
  * @author:梁志杰
@@ -37,5 +43,26 @@ public class EduStudentIdServiceImpl implements IEduStudentIdService {
         Page<EduStudentId> page = eduStudentIdRepository.findAll((root, query, criteriaBuilder)->
                 QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page);
+    }
+
+    /**
+     * 生成学生学号
+     * @param studentIdModel
+     */
+    @Override
+    public void addStudentId(StudentIdModel studentIdModel) {
+        List<String> list = XuedenUtil.startFormat(studentIdModel.getStartNo(),studentIdModel.getNumber());
+        List<EduStudentId> eduStudentIdList = list.stream().map(item-> {
+            EduStudentId eduStudentId = new EduStudentId();
+            eduStudentId.setStudentId(Long.parseLong(item));
+            eduStudentId.setStatus(0);
+            return eduStudentId;
+        }).collect(Collectors.toList());
+        try {
+            eduStudentIdRepository.saveAll(eduStudentIdList);
+        }catch (Exception e){
+            throw new BadRequestException("生成失败，有重复的学号");
+        }
+
     }
 }

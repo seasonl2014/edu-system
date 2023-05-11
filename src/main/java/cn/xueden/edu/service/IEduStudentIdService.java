@@ -1,6 +1,7 @@
 package cn.xueden.edu.service;
 
 import cn.xueden.edu.service.dto.EduStudentIdQueryCriteria;
+import cn.xueden.edu.vo.StudentIdModel;
 import org.springframework.data.domain.Pageable;
 
 /**功能描述：学生学号业务接口
@@ -18,4 +19,10 @@ public interface IEduStudentIdService {
      * @return
      */
     Object getList(EduStudentIdQueryCriteria queryCriteria, Pageable pageable);
+
+    /**
+     * 生成学生学号
+     * @param studentIdModel
+     */
+    void addStudentId(StudentIdModel studentIdModel);
 }
