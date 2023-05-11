@@ -18,7 +18,10 @@ import java.time.Period;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**工具类
@@ -29,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class XuedenUtil {
     private static final Pattern SPLIT_PATTERN = Pattern.compile("\\|");
-
+    private final static AtomicInteger atomic = new AtomicInteger(0);
     /**
      * 随机生成六位数
      * @return
@@ -273,9 +276,29 @@ public class XuedenUtil {
         return info;
     }
 
+    public static List<String> startFormat(int startNO,int cycleTimes) {
+        List<String> resultList = new ArrayList<>();
+        int numLength = 8;
+        resultList =  Stream.iterate(startNO, item->item+1).limit(cycleTimes)
+                .map(item -> String.valueOf(item))
+                .map(item -> {
+                    while (item.length()<numLength) {
+                        item="0"+item;
+                    }
+                    return item;
+                }).collect(Collectors.toList());
+
+        return resultList;
+
+    }
+
     public static void main(String[] args) throws IOException {
         //getMiddleDate(LocalDate.of(2023, 03, 10), LocalDate.now()).stream().forEach(System.out::println);
-        getCityInfo("180.137.111.52");
+        // getCityInfo("180.137.111.52");
+        int cycleTimes = 1000;
+        int startNO = 10000000;
+        System.out.println(startFormat(startNO,cycleTimes));
+
     }
 
 

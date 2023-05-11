@@ -12,10 +12,5 @@ import java.util.List;
  * @author Administrator
  */
 public interface EduStudentRepository extends JpaRepository<EduStudent, Long>, JpaSpecificationExecutor<EduStudent> {
-    /**
-     * 根据班级ID获取所有学生
-     * @param gradeClassId
-     * @return
-     */
-    List<EduStudent> findAllByGradeClassId(Long gradeClassId);
+
 }

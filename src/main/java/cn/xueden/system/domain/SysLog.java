@@ -94,30 +94,6 @@ public class SysLog extends BaseEntity {
     private String browser;
 
     /**
-     * 地区
-     */
-    @Column(name = "area")
-    private String area;
-
-    /**
-     * 省
-     */
-    @Column(name = "province")
-    private String province;
-
-    /**
-     * 市
-     */
-    @Column(name = "city")
-    private String city;
-
-    /**
-     * 网络服务提供商
-     */
-    @Column(name = "isp")
-    private String isp;
-
-    /**
      * 异常信息
      */
     @Column(name = "exception")

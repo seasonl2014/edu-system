@@ -22,6 +22,18 @@ public class EduStudent extends BaseEntity {
     private Long id;
 
     /**
+     * 登录账号
+     */
+    @Column(name = "login_name",nullable = false)
+    private String loginName;
+
+    /**
+     * 登录密码
+     */
+    @Column(name = "password",nullable = false)
+    private String password;
+
+    /**
      * 学号
      */
     @Column(name = "stu_no",nullable = false)
@@ -43,14 +55,28 @@ public class EduStudent extends BaseEntity {
     /**
      * 手机号
      */
-    @Column(name = "phone",nullable = false)
+    @Column(name = "phone")
     private String phone;
+
+    /**
+     * 邮箱
+     */
+    @Column(name = "email",nullable = false)
+    private String email;
 
     /**
      * QQ
      */
     @Column(name = "qq")
     private String qq;
+
+    /**
+     * 绑定微信扫码登录
+     */
+    @Column(name = "wx_open_id")
+    private String wxOpenId;
+
+
 
     @Override
     public String toString() {

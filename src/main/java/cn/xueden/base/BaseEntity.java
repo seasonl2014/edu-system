@@ -61,6 +61,36 @@ public class BaseEntity implements Serializable {
     @Column(name = "remarks")
     private String remarks;
 
+    /**
+     * 所属网站
+     */
+    @Column(name = "website",nullable = false)
+    private String website;
+
+    /**
+     * 地区
+     */
+    @Column(name = "area")
+    private String area;
+
+    /**
+     * 省
+     */
+    @Column(name = "province")
+    private String province;
+
+    /**
+     * 市
+     */
+    @Column(name = "city")
+    private String city;
+
+    /**
+     * 网络服务提供商
+     */
+    @Column(name = "isp")
+    private String isp;
+
     public @interface Update {}
 
     @Override
