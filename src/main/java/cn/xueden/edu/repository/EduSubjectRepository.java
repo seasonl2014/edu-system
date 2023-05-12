@@ -8,4 +8,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @author Administrator
  */
 public interface EduSubjectRepository extends JpaRepository<EduSubject, Long>, JpaSpecificationExecutor<EduSubject> {
+    /**
+     * 获取父节点
+     * @param parentId
+     * @return
+     */
+    EduSubject getByParentId(Long parentId);
 }

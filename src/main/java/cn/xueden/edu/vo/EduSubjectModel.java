@@ -26,6 +26,9 @@ public class EduSubjectModel {
 
     private Integer sort;
 
+    /**备注*/
+    private String remarks;
+
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
     private Date createTime;
 
