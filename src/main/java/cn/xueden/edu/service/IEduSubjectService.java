@@ -49,4 +49,12 @@ public interface IEduSubjectService {
      * @param eduSubjectModel
      */
     void add(EduSubjectModel eduSubjectModel);
+
+    /**
+     * 获取栏目和课程
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    List<EduSubjectModel> getIndexColumnCourses(EduSubjectQueryCriteria queryCriteria, Pageable pageable);
 }

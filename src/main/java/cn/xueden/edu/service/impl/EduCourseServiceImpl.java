@@ -12,6 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**功能描述：课程业务接口实现
  * @author:梁志杰
  * @date:2023/5/12
@@ -79,5 +83,35 @@ public class EduCourseServiceImpl implements IEduCourseService {
     @Override
     public void deleteById(Long id) {
         eduCourseRepository.deleteById(id);
+    }
+
+    /**
+     * 获取首页各类别课程
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object findIndexCourseList(Pageable pageable) {
+        Map<String,Object> resultMap = new HashMap<>();
+        // 已发布的课程
+        String status = "Normal";
+        // 根据条件分页获取入门课程
+        int courseType = 0;
+       List<EduCourse> startedCourses = eduCourseRepository.findByStatusAndCourseType(status,courseType,pageable);
+       resultMap.put("startedCourses",startedCourses);
+
+        // 根据条件分页获取新上好课
+        courseType = 1;
+        List<EduCourse> newCourses = eduCourseRepository.findByStatusAndCourseType(status,courseType,pageable);
+        resultMap.put("newCourses",newCourses);
+        // 根据条件分页获取技能提高
+        courseType = 2;
+        List<EduCourse> skillCourses = eduCourseRepository.findByStatusAndCourseType(status,courseType,pageable);
+        resultMap.put("skillCourses",skillCourses);
+        // 根据条件分页获取实战课程
+        courseType = 3;
+        List<EduCourse> actualCourses = eduCourseRepository.findByStatusAndCourseType(status,courseType,pageable);
+        resultMap.put("actualCourses",actualCourses);
+        return resultMap;
     }
 }

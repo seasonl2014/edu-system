@@ -43,4 +43,11 @@ public interface IEduCourseService {
      * @param id
      */
     void deleteById(Long id);
+
+    /**
+     * 获取首页各类别课程
+     * @param pageable
+     * @return
+     */
+    Object findIndexCourseList(Pageable pageable);
 }

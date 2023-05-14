@@ -45,9 +45,14 @@ public class EduCourse extends BaseEntity {
 
 
     /**
-     * 课程销售价格，设置为0则可免费观看
+     * 课程销售优惠价格，设置为0则可免费观看
      */
     private BigDecimal price;
+
+    /**
+     * 原来课程销售价格
+     */
+    private BigDecimal originalPrice;
 
     /**
      * 总课时

@@ -5,7 +5,10 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.xueden.edu.alivod.AliVodCategoryService;
 import cn.xueden.edu.alivod.dto.CategoryDto;
 import cn.xueden.edu.converter.EduSubjectConverter;
+import cn.xueden.edu.domain.EduCourse;
+import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.domain.EduSubject;
+import cn.xueden.edu.repository.EduCourseRepository;
 import cn.xueden.edu.repository.EduSubjectRepository;
 import cn.xueden.edu.service.IEduSubjectService;
 import cn.xueden.edu.service.dto.EduSubjectQueryCriteria;
@@ -17,7 +20,11 @@ import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.PageVo;
 
+import cn.xueden.utils.QueryHelp;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +44,12 @@ public class EduSubjectServiceImpl implements IEduSubjectService {
 
     private final AliVodCategoryService vidCategoryClient;
 
-    public EduSubjectServiceImpl(EduSubjectRepository eduSubjectRepository, AliVodCategoryService vidCategoryClient) {
+    private final EduCourseRepository eduCourseRepository;
+
+    public EduSubjectServiceImpl(EduSubjectRepository eduSubjectRepository, AliVodCategoryService vidCategoryClient, EduCourseRepository eduCourseRepository) {
         this.eduSubjectRepository = eduSubjectRepository;
         this.vidCategoryClient = vidCategoryClient;
+        this.eduCourseRepository = eduCourseRepository;
     }
 
     /**
@@ -128,5 +138,32 @@ public class EduSubjectServiceImpl implements IEduSubjectService {
             throw new BadRequestException("添加失败，请检查阿里云视频点播配置是否正确！");
         }
 
+    }
+
+    /**
+     * 获取栏目和课程
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    @Override
+    public List<EduSubjectModel> getIndexColumnCourses(EduSubjectQueryCriteria queryCriteria, Pageable pageable) {
+
+        Page<EduSubject> page = eduSubjectRepository.findAll((root, query, criteriaBuilder)->
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+        List<EduSubjectModel> eduSubjectVOList = EduSubjectConverter.converterToVOList(page.stream().toList());
+        for(EduSubjectModel eduSubjectModel:eduSubjectVOList){
+            // 分别获取两个子栏目
+            Pageable subPageable= PageRequest.of(0,2);
+            List<EduSubject> subEduSubjects =eduSubjectRepository.findByParentId(eduSubjectModel.getId(),subPageable);
+            eduSubjectModel.setChildrens(subEduSubjects);
+
+            // 分别获取8个课程
+            Pageable subCoursePageable= PageRequest.of(0,8);
+            List<EduCourse> courseList = eduCourseRepository.findBySubjectParentId(eduSubjectModel.getId(),subCoursePageable);
+            eduSubjectModel.setEduCourseList(courseList);
+
+        }
+        return eduSubjectVOList;
     }
 }
