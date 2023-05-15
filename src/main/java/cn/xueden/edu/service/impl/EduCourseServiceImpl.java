@@ -7,6 +7,7 @@ import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -72,7 +73,10 @@ public class EduCourseServiceImpl implements IEduCourseService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void editCourse(EduCourse eduCourse) {
-
+        // 根据课程ID获取课程信息
+        EduCourse dbEduCourse = getById(eduCourse.getId());
+        BeanUtils.copyProperties(eduCourse,dbEduCourse);
+        eduCourseRepository.save(dbEduCourse);
     }
 
     /**

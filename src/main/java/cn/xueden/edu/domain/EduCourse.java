@@ -1,6 +1,7 @@
 package cn.xueden.edu.domain;
 
 import cn.xueden.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 @Data
 @Table(name = "edu_course")
 @org.hibernate.annotations.Table(appliesTo = "edu_course",comment = "课程信息表")
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
 public class EduCourse extends BaseEntity {
 
     @Id
