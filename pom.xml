@@ -104,7 +104,10 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-sdk-vod-upload</artifactId>
-            <version>1.4.11</version>
+           <!-- <version>1.4.11</version>-->
+            <version>1.4.15</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/aliyun-java-vod-upload-1.4.15.jar</systemPath>
         </dependency>
 
 

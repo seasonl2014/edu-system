@@ -45,6 +45,12 @@ public class EduStudent extends BaseEntity {
     @Column(name = "name")
     private String name;
 
+    /**
+     * 学员登录次数
+     */
+    @Column(name = "login_times")
+    private Integer loginTimes;
+
 
     /**
      * 性别
@@ -81,6 +87,18 @@ public class EduStudent extends BaseEntity {
      */
     @Column(name = "status",nullable = false)
     private Integer status;
+
+    /**
+     * 学员头像
+     */
+    @Column(name = "student_icon")
+    private String studentIcon;
+
+    /**
+     * 学员登录后的token
+     */
+    @Transient
+    private String studentToken;
 
 
 

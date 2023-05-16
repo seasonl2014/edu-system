@@ -1,5 +1,6 @@
 package cn.xueden.edu.service;
 
+import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduStudent;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
@@ -52,4 +53,11 @@ public interface IEduStudentService {
      * @return
      */
     long getCount();
+
+    /**
+     * 学员登录
+     * @param student
+     * @return
+     */
+    BaseResult login(EduStudent student);
 }

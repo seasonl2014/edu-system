@@ -8,6 +8,8 @@ import cn.xueden.edu.service.IEduVipTypeService;
 
 import cn.xueden.edu.service.dto.EduVipTypeQueryCriteria;
 import cn.xueden.utils.PageVo;
+import cn.xueden.utils.XuedenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,6 +46,28 @@ public class EduVipTypeController {
     public BaseResult addEduVipType(@RequestBody EduVipType eduVipType){
         eduVipTypeService.addEduVipType(eduVipType);
         return BaseResult.success("添加成功");
+    }
+
+    @EnableSysLog("【前台】获取所有会员类型")
+    @GetMapping("getAllVip")
+    public BaseResult getAllVip(){
+        return BaseResult.success(eduVipTypeService.findAll());
+    }
+
+    @EnableSysLog("【前台】购买会员")
+    @GetMapping("buyVip/{id}")
+    public BaseResult buyVip(@PathVariable Long id,
+                             HttpServletRequest request){
+        String studentToken = request.getHeader("studentToken");
+        if(studentToken==null||studentToken.equals("null")){
+            return BaseResult.fail("购买失败，请先登录！");
+        }
+        if(id==null){
+            return BaseResult.fail("购买失败");
+        }
+        // 获取用户IP地址
+        String ipAddress = XuedenUtil.getClientIp(request);
+        return BaseResult.success(eduVipTypeService.findAll());
     }
 
 }

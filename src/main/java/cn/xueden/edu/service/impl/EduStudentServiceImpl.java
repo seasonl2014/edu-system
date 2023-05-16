@@ -2,6 +2,7 @@ package cn.xueden.edu.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.domain.EduStudentId;
 import cn.xueden.edu.repository.EduStudentIdRepository;
@@ -11,11 +12,8 @@ import cn.xueden.edu.service.IEduStudentService;
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
 import cn.xueden.exception.BadRequestException;
-import cn.xueden.utils.Md5Util;
-import cn.xueden.utils.PageUtil;
-import cn.xueden.utils.QueryHelp;
+import cn.xueden.utils.*;
 
-import cn.xueden.utils.XuedenUtil;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -119,5 +117,28 @@ public class EduStudentServiceImpl implements IEduStudentService {
     @Override
     public long getCount() {
         return studentRepository.count();
+    }
+
+    @Override
+    public BaseResult login(EduStudent student) {
+        // 根据手机号获取学员信息
+        EduStudent dbEduStudent = studentRepository.findByPhone(student.getPhone());
+        if(dbEduStudent==null){
+            return BaseResult.fail("登录失败，该手机号未注册！");
+        }else if (!dbEduStudent.getPassword().equals(Md5Util.Md5(student.getPassword()))){
+            return BaseResult.fail("登录失败，输入密码不正确！");
+        }else if(dbEduStudent.getStatus()==0){
+            return BaseResult.fail("登录失败，该账号已被冻结，请联系客服！");
+        }else {
+           // 更新登录次数
+            Integer loginTimes = student.getLoginTimes()==null?1:student.getLoginTimes()+1;
+            dbEduStudent.setLoginTimes(loginTimes);
+            studentRepository.save(dbEduStudent);
+        }
+
+        // 生成token
+        String token = HutoolJWTUtil.createToken(dbEduStudent);
+        dbEduStudent.setStudentToken(token);
+        return BaseResult.success(dbEduStudent);
     }
 }

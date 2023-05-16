@@ -5,15 +5,23 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.utils.AliyunVODSDKUtils;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 import cn.xueden.edu.domain.EduCourse;
+import cn.xueden.edu.domain.EduTeacher;
 import cn.xueden.edu.service.IEduCourseChapterService;
 import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.IEduEnvironmenParamService;
+import cn.xueden.edu.service.IEduTeacherService;
+import cn.xueden.edu.vo.EduCourseModel;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthRequest;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthResponse;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**功能描述：前台详情页前端控制器
@@ -32,10 +40,13 @@ public class EduDetailController {
 
     private final IEduCourseChapterService eduCourseChapterService;
 
-    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService) {
+    private final IEduTeacherService teacherService;
+
+    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseChapterService = eduCourseChapterService;
+        this.teacherService = teacherService;
     }
 
     @EnableSysLog("【前台】根据课程ID获取课程详情详细")
@@ -44,7 +55,19 @@ public class EduDetailController {
         EduCourse dbEduCourse = eduCourseService.getById(id);
         dbEduCourse.setViewCount(dbEduCourse.getViewCount()+1);
         eduCourseService.editCourse(dbEduCourse);
-        return BaseResult.success(dbEduCourse);
+        // 获取讲师信息
+        EduTeacher eduTeacher = teacherService.getById(dbEduCourse.getTeacherId());
+        EduCourseModel eduCourseModel = new EduCourseModel();
+        BeanUtils.copyProperties(dbEduCourse,eduCourseModel);
+        eduCourseModel.setEduTeacher(eduTeacher);
+
+        // 获取指定教师的十门课程
+        Pageable pageable = PageRequest.of(0, 10,
+                Sort.Direction.DESC,"id");
+        List<EduCourse> eduCourseList = eduCourseService.findListByTeacherId(eduTeacher.getId(),pageable);
+        eduCourseModel.setTeacherCourses(eduCourseList);
+
+        return BaseResult.success(eduCourseModel);
     }
 
     @EnableSysLog("【前台】根据课程ID获取相应的开发环境参数数据")

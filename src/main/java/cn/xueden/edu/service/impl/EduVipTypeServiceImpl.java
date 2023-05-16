@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**功能描述：VIP类别业务接口实现类
  * @author:梁志杰
  * @date:2023/5/11
@@ -46,5 +48,14 @@ public class EduVipTypeServiceImpl implements IEduVipTypeService {
     public void addEduVipType(EduVipType eduVipType) {
         eduVipType.setNums(0);
         eduVipTypeRepository.save(eduVipType);
+    }
+
+    /**
+     * 获取所有会员类型
+     * @return
+     */
+    @Override
+    public List<EduVipType> findAll() {
+        return eduVipTypeRepository.findAll();
     }
 }

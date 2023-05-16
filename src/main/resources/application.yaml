@@ -39,17 +39,17 @@ ip2region:
 aliyun: #阿里云 vod
   vod: #不同的服务器，地址不同
     file:
-      keyid: 06QL4XJV3LNYJGGE
-      keysecret: iMq2Gy7RdpC0LIZkLK0NBTBLeQjpd7
-      templategroupid: 395d7f5f480de41259833d4191672fc5
+      keyid: LTAI5tGR2JVu7kaPxbkWkn7G
+      keysecret: rgYtogbLe9lseA2VjINgfAXzab1Xp2
+      templategroupid: f015b4b2dde5fbc94015cdb18ea1a6ec
   oss:
     file:
       endpoint: oss-cn-shanghai.aliyuncs.com
-      bucketname: xueden-cloud-edu
+      bucketname: goxuetang
       bucketcoursename: xueden-cloud-edu-course
-      host: career
-      hostcourse: course
-      hostpath: http://alioss.xueden.cn
+      host: career # 存放头像
+      hostcourse: course # 存放课程封面图片等
+      hostpath: http://alioss.xueden.cn # 上传图片回显路径
   sms:
     regionid: cn-hangzhou
     signname: 墨鱼课堂

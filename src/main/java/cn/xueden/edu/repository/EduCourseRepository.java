@@ -29,4 +29,12 @@ public interface EduCourseRepository extends JpaRepository<EduCourse, Long>, Jpa
      * @return
      */
     List<EduCourse> findByStatusAndCourseType(String status, int courseType, Pageable pageable);
+
+    /**
+     * 获取指定教师的十门课程
+     * @param id
+     * @param pageable
+     * @return
+     */
+    List<EduCourse> findListByTeacherId(Long id, Pageable pageable);
 }

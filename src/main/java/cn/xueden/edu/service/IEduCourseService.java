@@ -4,6 +4,8 @@ import cn.xueden.edu.domain.EduCourse;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**功能描述：课程业务接口
  * @author:梁志杰
  * @date:2023/5/12
@@ -50,4 +52,12 @@ public interface IEduCourseService {
      * @return
      */
     Object findIndexCourseList(Pageable pageable);
+
+    /**
+     * 获取指定教师的十门课程
+     * @param id
+     * @param pageable
+     * @return
+     */
+    List<EduCourse> findListByTeacherId(Long id, Pageable pageable);
 }

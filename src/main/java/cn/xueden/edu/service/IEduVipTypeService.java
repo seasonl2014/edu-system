@@ -4,6 +4,8 @@ import cn.xueden.edu.domain.EduVipType;
 import cn.xueden.edu.service.dto.EduVipTypeQueryCriteria;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**功能描述：VIP类别业务接口
  * @author:梁志杰
  * @date:2023/5/11
@@ -24,4 +26,10 @@ public interface IEduVipTypeService {
      * @param eduVipType
      */
     void addEduVipType(EduVipType eduVipType);
+
+    /**
+     * 获取所有会员类型
+     * @return
+     */
+    List<EduVipType> findAll();
 }

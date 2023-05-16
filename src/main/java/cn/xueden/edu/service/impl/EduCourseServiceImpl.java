@@ -63,7 +63,7 @@ public class EduCourseServiceImpl implements IEduCourseService {
      */
     @Override
     public EduCourse getById(Long id) {
-        return eduCourseRepository.getReferenceById(id);
+        return eduCourseRepository.findById(id).orElseGet(EduCourse::new);
     }
 
     /**
@@ -117,5 +117,16 @@ public class EduCourseServiceImpl implements IEduCourseService {
         List<EduCourse> actualCourses = eduCourseRepository.findByStatusAndCourseType(status,courseType,pageable);
         resultMap.put("actualCourses",actualCourses);
         return resultMap;
+    }
+
+    /**
+     * 获取指定教师的十门课程
+     * @param id
+     * @param pageable
+     * @return
+     */
+    @Override
+    public List<EduCourse> findListByTeacherId(Long id, Pageable pageable) {
+        return eduCourseRepository.findListByTeacherId(id,pageable);
     }
 }

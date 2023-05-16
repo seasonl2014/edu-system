@@ -13,4 +13,10 @@ import java.util.List;
  */
 public interface EduStudentRepository extends JpaRepository<EduStudent, Long>, JpaSpecificationExecutor<EduStudent> {
 
+    /**
+     * 根据手机号获取学员信息
+     * @param phone
+     * @return
+     */
+    EduStudent findByPhone(String phone);
 }
