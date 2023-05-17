@@ -167,4 +167,10 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
             }
         }
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updatePayment(EduStudentBuyVip pay) {
+        eduStudentBuyVipRepository.save(pay);
+    }
 }

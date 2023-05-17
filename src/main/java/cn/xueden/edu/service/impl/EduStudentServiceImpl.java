@@ -141,4 +141,14 @@ public class EduStudentServiceImpl implements IEduStudentService {
         dbEduStudent.setStudentToken(token);
         return BaseResult.success(dbEduStudent);
     }
+
+    /**
+     * 根据openid获取学员信息
+     * @param openid
+     * @return
+     */
+    @Override
+    public EduStudent getByOpenid(String openid) {
+        return studentRepository.getByWxOpenId(openid);
+    }
 }

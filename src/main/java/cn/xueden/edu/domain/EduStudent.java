@@ -83,6 +83,12 @@ public class EduStudent extends BaseEntity {
     private String wxOpenId;
 
     /**
+     * 微信unionid
+     */
+    @Column(name = "wx_union_id")
+    private String unionId;
+
+    /**
      * 状态，1表示启用，0表示禁用
      */
     @Column(name = "status",nullable = false)

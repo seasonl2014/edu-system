@@ -124,6 +124,12 @@
             <version>0.2.2</version>
         </dependency>
 
+        <!--微信扫码登录用到-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

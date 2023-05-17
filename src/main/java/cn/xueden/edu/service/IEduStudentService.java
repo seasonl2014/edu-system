@@ -60,4 +60,11 @@ public interface IEduStudentService {
      * @return
      */
     BaseResult login(EduStudent student);
+
+    /**
+     * 根据openid获取学员信息
+     * @param openid
+     * @return
+     */
+    EduStudent getByOpenid(String openid);
 }

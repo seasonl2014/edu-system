@@ -31,4 +31,10 @@ public interface IEduStudentBuyVipService {
      * @return
      */
     String payBuy(String orderNo);
+
+    /**
+     * 更新订单信息
+     * @param pay
+     */
+    void updatePayment(EduStudentBuyVip pay);
 }

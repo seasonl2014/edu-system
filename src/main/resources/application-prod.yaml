@@ -32,3 +32,43 @@ spring:
 # 用户头像存放路径
 user:
   icon: /home/hotel/file/
+
+aliyun: #阿里云 vod
+  vod: #不同的服务器，地址不同
+    file:
+      keyid: LTAI5tGR2JVu7kaPxbkWkn7G
+      keysecret: rgYtogbLe9lseA2VjINgfAXzab1Xp2
+      templategroupid: f015b4b2dde5fbc94015cdb18ea1a6ec
+  oss:
+    file:
+      endpoint: oss-cn-shanghai.aliyuncs.com
+      bucketname: goxuetang
+      bucketcoursename: xueden-cloud-edu-course
+      host: career # 存放头像
+      hostcourse: course # 存放课程封面图片等
+      hostpath: http://alioss.xueden.cn # 上传图片回显路径
+  sms:
+    regionid: cn-hangzhou
+    signname: 墨鱼课堂
+    templatecode: SMS_209832260
+
+# 微信支付配置信息
+wechatpay:
+  #  商户号
+  mchId: 1609278725
+  #  微信公众平台服务号appId
+  appId: wx35ab526714d35ec8
+  #  v3接口 CA证书 apiclient_key.pem私钥内容
+  privateKey: /var/xueden/wxpay/apiclient_key.pem
+  #  wechatpay.pem证书内容 必填  填写classpath路径 位于 maven项目的resources文件下
+  wechatpaykey: /var/xueden/wxpay/wechatpay_1AE730C43AEF378DF327266692F3BB9567C42A00.pem
+  #  商户证书序列号 CA证书 可查看微信商户平台-账户设置-安全设置-api安全密钥
+  mcHserialNo: 6190F6345D8B5D3DFD4CF540DB97FA730357C7F9
+  # native支付请求接口
+  nativeV3Api: https://api.mch.weixin.qq.com/v3/pay/transactions/native
+  # 购买课程异步回调通知
+  notifyCourseUrl: http://gateway.xueden.cn/edu/pay/wxCourseCallback
+  # 购买VIP会员异步回调通知
+  notifyVipUrl: http://gateway.xueden.cn/edu/pay/wxVipCallback
+  # apiv3密钥
+  aPIv3key: 58a557e3b2c3b96cb4780e6856f38dce
