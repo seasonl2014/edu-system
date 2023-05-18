@@ -5,21 +5,25 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.utils.AliyunVODSDKUtils;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 import cn.xueden.edu.domain.EduCourse;
+import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduTeacher;
-import cn.xueden.edu.service.IEduCourseChapterService;
-import cn.xueden.edu.service.IEduCourseService;
-import cn.xueden.edu.service.IEduEnvironmenParamService;
-import cn.xueden.edu.service.IEduTeacherService;
+import cn.xueden.edu.service.*;
 import cn.xueden.edu.vo.EduCourseModel;
+import cn.xueden.edu.wechat.dto.AmountDto;
+import cn.xueden.edu.wechat.dto.WxOrderDto;
+import cn.xueden.utils.XuedenUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthRequest;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +46,14 @@ public class EduDetailController {
 
     private final IEduTeacherService teacherService;
 
-    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService) {
+    private final IEduStudentBuyCourseService eduStudentBuyCourseService;
+
+    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseChapterService = eduCourseChapterService;
         this.teacherService = teacherService;
+        this.eduStudentBuyCourseService = eduStudentBuyCourseService;
     }
 
     @EnableSysLog("【前台】根据课程ID获取课程详情详细")
@@ -122,5 +129,49 @@ public class EduDetailController {
             return BaseResult.fail("获取播放凭证失败");
         }
 
+    }
+
+
+    @PostMapping("/buy/{id}")
+    @EnableSysLog("【前台】会员购买课程")
+    public BaseResult buy(@PathVariable Long id,
+                            HttpServletRequest request) {
+        String token = request.getHeader("studentToken");
+        if(token==null||token.equals("null")){
+            return BaseResult.fail("购买失败，请先登录！");
+        }
+        // 获取用户IP地址
+        String ipAddress = XuedenUtil.getClientIp(request);
+        EduStudentBuyCourse result = eduStudentBuyCourseService.buy(id,token,ipAddress);
+        if(result!=null&&result.getIsPayment()==1){
+            return BaseResult.fail("您已购买过该课程，无需再购买！");
+        }else {
+            return  BaseResult.success(result);
+        }
+
+    }
+
+    @PostMapping("/pay/{orderNo}")
+    @EnableSysLog("【前台】购买课程立即付款")
+    public BaseResult pay(@PathVariable String orderNo,
+                            HttpServletRequest request) throws Exception {
+        String token = request.getHeader("studentToken");
+        if(token==null||token.equals("null")){
+            return BaseResult.fail("付款失败，请先登录！");
+        }
+       return BaseResult.success(eduStudentBuyCourseService.pay(orderNo));
+    }
+
+    @EnableSysLog("【前台】根据订单编号获取订单详情")
+    @GetMapping("getCourseOrderInfo/{orderNo}")
+    public BaseResult getCourseOrderInfo(@PathVariable String orderNo){
+        Map<String,Object> resultMap = new HashMap<>();
+        // 获取订单详情
+        EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseService.getByOrderNumber(orderNo);
+        resultMap.put("price",dbEduStudentBuyCourse.getPrice());
+        // 根据课程ID获取课程详情
+        EduCourse dbEduCourse = eduCourseService.getById(dbEduStudentBuyCourse.getCourseId());
+        resultMap.put("title",dbEduCourse.getTitle());
+        return BaseResult.success(resultMap);
     }
 }

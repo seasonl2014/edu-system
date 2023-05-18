@@ -60,4 +60,10 @@ public interface IEduCourseService {
      * @return
      */
     List<EduCourse> findListByTeacherId(Long id, Pageable pageable);
+
+    /**
+     * 根据课程ID更新课程购买数量
+     * @param courseId
+     */
+    void updateBuyCount(Long courseId);
 }

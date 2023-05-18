@@ -7,6 +7,7 @@ import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
+import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -128,5 +129,16 @@ public class EduCourseServiceImpl implements IEduCourseService {
     @Override
     public List<EduCourse> findListByTeacherId(Long id, Pageable pageable) {
         return eduCourseRepository.findListByTeacherId(id,pageable);
+    }
+
+    /**
+     * 根据课程ID更新课程购买数量
+     * @param courseId
+     */
+    @Override
+    public void updateBuyCount(Long courseId) {
+        EduCourse  eduCourse = getById(courseId);
+        eduCourse.setBuyCount(eduCourse.getBuyCount()==null?1:eduCourse.getBuyCount()+1);
+        eduCourseRepository.save(eduCourse);
     }
 }
