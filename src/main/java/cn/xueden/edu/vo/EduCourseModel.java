@@ -27,4 +27,9 @@ public class EduCourseModel extends EduCourse {
      */
     private List<EduCourse> teacherCourses;
 
+    /**
+     * 观看视频权限
+     */
+    private boolean viewVideo;
+
 }

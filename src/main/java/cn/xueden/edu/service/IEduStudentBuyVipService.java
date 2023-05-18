@@ -37,4 +37,11 @@ public interface IEduStudentBuyVipService {
      * @param pay
      */
     void updatePayment(EduStudentBuyVip pay);
+
+    /**
+     * 根据学员ID查询记录
+     * @param studentId
+     * @return
+     */
+    EduStudentBuyVip findByStudentId(Long studentId);
 }

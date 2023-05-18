@@ -29,4 +29,12 @@ public interface EduStudentBuyCourseRepository extends JpaRepository<EduStudentB
      * @return
      */
     EduStudentBuyCourse findByStudentIdAndCourseId(Long studentId, Long courseId);
+
+    /**
+     * 根据课程ID和学员ID查找记录
+     * @param courseId
+     * @param studentId
+     * @return
+     */
+    EduStudentBuyCourse findByCourseIdAndStudentId(Long courseId, Long studentId);
 }

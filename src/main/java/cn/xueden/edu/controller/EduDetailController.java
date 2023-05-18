@@ -6,11 +6,13 @@ import cn.xueden.edu.alivod.utils.AliyunVODSDKUtils;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 import cn.xueden.edu.domain.EduCourse;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
+import cn.xueden.edu.domain.EduStudentBuyVip;
 import cn.xueden.edu.domain.EduTeacher;
 import cn.xueden.edu.service.*;
 import cn.xueden.edu.vo.EduCourseModel;
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
+import cn.xueden.utils.HutoolJWTUtil;
 import cn.xueden.utils.XuedenUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
@@ -48,17 +50,21 @@ public class EduDetailController {
 
     private final IEduStudentBuyCourseService eduStudentBuyCourseService;
 
-    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService) {
+    private final IEduStudentBuyVipService eduStudentBuyVipService;
+
+    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseChapterService = eduCourseChapterService;
         this.teacherService = teacherService;
         this.eduStudentBuyCourseService = eduStudentBuyCourseService;
+        this.eduStudentBuyVipService = eduStudentBuyVipService;
     }
 
     @EnableSysLog("【前台】根据课程ID获取课程详情详细")
     @GetMapping("/{id}")
-    public BaseResult detail(@PathVariable Long id){
+    public BaseResult detail(@PathVariable Long id,
+                             HttpServletRequest request){
         EduCourse dbEduCourse = eduCourseService.getById(id);
         dbEduCourse.setViewCount(dbEduCourse.getViewCount()+1);
         eduCourseService.editCourse(dbEduCourse);
@@ -67,12 +73,31 @@ public class EduDetailController {
         EduCourseModel eduCourseModel = new EduCourseModel();
         BeanUtils.copyProperties(dbEduCourse,eduCourseModel);
         eduCourseModel.setEduTeacher(eduTeacher);
-
+        eduCourseModel.setViewVideo(false);
         // 获取指定教师的十门课程
         Pageable pageable = PageRequest.of(0, 10,
                 Sort.Direction.DESC,"id");
         List<EduCourse> eduCourseList = eduCourseService.findListByTeacherId(eduTeacher.getId(),pageable);
         eduCourseModel.setTeacherCourses(eduCourseList);
+
+        // 判断是否有观看视频权限
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")){
+            // 获取登录学员ID
+            Long studentId= HutoolJWTUtil.parseToken(token);
+            // 是否是VIP会员
+          EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipService.findByStudentId(studentId);
+          if(dbEduStudentBuyVip!=null&&dbEduStudentBuyVip.getIsPayment()==1){
+              eduCourseModel.setViewVideo(true);
+          // 是否已经购买课程
+          }else{
+              EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseService.findByCourseIdAndStudentId(id,studentId);
+              if(dbEduStudentBuyCourse!=null && dbEduStudentBuyCourse.getIsPayment()==1){
+                  eduCourseModel.setViewVideo(true);
+              }
+          }
+
+        }
 
         return BaseResult.success(eduCourseModel);
     }

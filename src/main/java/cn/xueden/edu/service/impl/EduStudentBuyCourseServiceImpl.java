@@ -160,4 +160,15 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
     public void updatePayment(EduStudentBuyCourse pay) {
         eduStudentBuyCourseRepository.save(pay);
     }
+
+    /**
+     * 根据课程ID和学员ID查找记录
+     * @param courseId
+     * @param studentId
+     * @return
+     */
+    @Override
+    public EduStudentBuyCourse findByCourseIdAndStudentId(Long courseId, Long studentId) {
+        return eduStudentBuyCourseRepository.findByCourseIdAndStudentId(courseId,studentId);
+    }
 }

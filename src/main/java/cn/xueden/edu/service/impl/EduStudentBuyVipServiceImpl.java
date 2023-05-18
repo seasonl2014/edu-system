@@ -173,4 +173,14 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
     public void updatePayment(EduStudentBuyVip pay) {
         eduStudentBuyVipRepository.save(pay);
     }
+
+    /**
+     * 根据学员ID查询记录
+     * @param studentId
+     * @return
+     */
+    @Override
+    public EduStudentBuyVip findByStudentId(Long studentId) {
+        return eduStudentBuyVipRepository.findByStudentId(studentId);
+    }
 }

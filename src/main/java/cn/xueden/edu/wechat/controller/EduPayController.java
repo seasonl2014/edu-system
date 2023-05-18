@@ -109,25 +109,24 @@ public class EduPayController {
                         }
 
                         //获取成交金额记录
-                     /*   EduDealMoney eduDealMoney = dealMoneyService.getByOrderNumber(Out_trade_no);
+                        EduDealMoney eduDealMoney = eduDealMoneyService.getByOrderNumber(Out_trade_no);
                         // 插入一条记录
                         if(eduDealMoney==null){
                             eduDealMoney = new EduDealMoney();
                             eduDealMoney.setOrderNo(Out_trade_no);
-                            eduDealMoney.setCountry(pay.getCountry());
                             eduDealMoney.setArea(pay.getArea());
                             eduDealMoney.setProvince(pay.getProvince());
                             eduDealMoney.setCity(pay.getCity());
                             eduDealMoney.setIsp(pay.getIsp());
-                            eduDealMoney.setBuyType(pay.getVipId());
-                            eduDealMoney.setMemberId(pay.getMemberId());
+                            eduDealMoney.setBuyType(1);
+                            eduDealMoney.setStudentId(pay.getStudentId());
                             eduDealMoney.setPrice(pay.getPrice());
-                            eduDealMoney.setUpdateId(pay.getMemberId());
-                            eduDealMoney.setCreateId(pay.getMemberId());
+                            eduDealMoney.setCreateBy(pay.getStudentId());
+                            eduDealMoney.setUpdateBy(pay.getStudentId());
                             eduDealMoney.setRemarks(pay.getRemarks());
                             eduDealMoney.setPayChannel(pay.getPayChannel());
-                            dealMoneyService.save(eduDealMoney);
-                        }*/
+                            eduDealMoneyService.save(eduDealMoney);
+                        }
 
                         //更新状态
                         pay.setIsPayment(1);//已付款
@@ -139,7 +138,7 @@ public class EduPayController {
                             map.put("status", 1);
                             map.put("msg", "支付成功,恭喜您成为网站的会员！");
                             String json = mapper.writeValueAsString(map);
-                            // WebSocketServer.sendInfo(json,Out_trade_no);
+                            WebSocketServer.sendInfo(json,Out_trade_no);
                         } catch (JsonProcessingException e) {
                             e.printStackTrace();
                         }
