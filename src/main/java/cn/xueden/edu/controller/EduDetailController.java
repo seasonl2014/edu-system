@@ -172,6 +172,7 @@ public class EduDetailController {
         // 根据课程ID获取课程详情
         EduCourse dbEduCourse = eduCourseService.getById(dbEduStudentBuyCourse.getCourseId());
         resultMap.put("title",dbEduCourse.getTitle());
+        resultMap.put("courseId",dbEduCourse.getId());
         return BaseResult.success(resultMap);
     }
 }

@@ -295,9 +295,9 @@ public class XuedenUtil {
     public static void main(String[] args) throws IOException {
         //getMiddleDate(LocalDate.of(2023, 03, 10), LocalDate.now()).stream().forEach(System.out::println);
         // getCityInfo("180.137.111.52");
-        int cycleTimes = 1000;
+        /*int cycleTimes = 1000;
         int startNO = 10000000;
-        System.out.println(startFormat(startNO,cycleTimes));
+        System.out.println(startFormat(startNO,cycleTimes));*/
 
     }
 

@@ -4,6 +4,8 @@ import cn.xueden.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**功能描述：讲师实体类
  * @author:梁志杰
  * @date:2023/5/11
@@ -21,6 +23,10 @@ public class EduTeacher extends BaseEntity {
     @Column(name = "id",nullable = false)
     private Long id;
 
+    /**
+     * 讲师头像
+     */
+    private String avatar;
 
     /**
      * 教师姓名
@@ -51,4 +57,34 @@ public class EduTeacher extends BaseEntity {
      */
     @Column(name = "email")
     private String email;
+
+    /**
+     * 头衔 1高级讲师 2首席讲师
+     */
+    private Integer level;
+
+    /**
+     * 累计收入
+     */
+    private BigDecimal incomeAmount;
+
+    /**
+     * 可提现金额
+     */
+    private BigDecimal cashOutMoney;
+
+    /**
+     * 收款人姓名
+     */
+    private String payeeName;
+
+    /**
+     * 收款卡号
+     */
+    private String cardNumber;
+
+    /**
+     * 收款银行
+     */
+    private String bank;
 }

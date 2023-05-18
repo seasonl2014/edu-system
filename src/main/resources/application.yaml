@@ -71,7 +71,7 @@ wechatpay:
   # native支付请求接口
   nativeV3Api: https://api.mch.weixin.qq.com/v3/pay/transactions/native
   # 购买课程异步回调通知
-  notifyCourseUrl: http://gateway.xueden.cn/edu/pay/wxCourseCallback
+  notifyCourseUrl: http://dev01.sv1.k9s.run:2271/edu/pay/wxCourseCallback
   # 购买VIP会员异步回调通知
   notifyVipUrl: http://dev01.sv1.k9s.run:2271/edu/pay/wxVipCallback
   # apiv3密钥

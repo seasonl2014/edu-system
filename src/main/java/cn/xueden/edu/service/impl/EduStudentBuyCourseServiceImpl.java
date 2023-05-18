@@ -94,6 +94,7 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
                     tempEduStudentBuyCourse.setOrderNo(orderNo);
                     tempEduStudentBuyCourse.setCreateBy(studentId);
                     tempEduStudentBuyCourse.setUpdateBy(studentId);
+                    tempEduStudentBuyCourse.setTeacherId(dhEduCourse.getTeacherId());
                     tempEduStudentBuyCourse.setRemarks("学员购买课程【"+dhEduCourse.getShortTitle()+"】");
                     eduStudentBuyCourseRepository.save(tempEduStudentBuyCourse);
                 }
@@ -139,7 +140,7 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
         wxOrderDto.setOut_trade_no(""+orderNo+"");
 
         wxOrderDto.setDescription(eduStudentBuyCourse.getRemarks());
-        wxOrderDto.setNotify_url(wechatConfig.getNotifyVipUrl());
+        wxOrderDto.setNotify_url(wechatConfig.getNotifyCourseUrl());
         wxOrderDto.setMchid(wechatConfig.getMchId());
         wxOrderDto.setAppid(wechatConfig.getAppId());
         try {
