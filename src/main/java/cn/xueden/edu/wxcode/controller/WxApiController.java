@@ -4,9 +4,10 @@ import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.service.IEduStudentService;
 import cn.xueden.edu.wxcode.WechatCodeConfig;
 import cn.xueden.edu.wxcode.utils.WeChatHttpUtils;
-import cn.xueden.utils.HutoolJWTUtil;
+
+import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.Md5Util;
-import cn.xueden.utils.XuedenUtil;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**功能描述：微信扫码登录前端控制器
  * @author:梁志杰
@@ -118,7 +121,9 @@ public class WxApiController {
             EduStudent dbEduStudent = eduStudentService.getByOpenid(openid);
             if(dbEduStudent!=null){
                 // 生成登录token
-                String studentToken = HutoolJWTUtil.createToken(dbEduStudent);
+                Map<String,String> map = new HashMap<>();
+                map.put("id",dbEduStudent.getId().toString());
+                String studentToken = JWTUtil.getToken(map);
                 dbEduStudent.setStudentToken(studentToken);
                 model.addAttribute("dbEduStudent",dbEduStudent);
                 model.addAttribute("frontUrl", wechatConfig.getFrontUrl());
@@ -158,7 +163,9 @@ public class WxApiController {
 
         }
         // 生成登录token
-        String studentToken = HutoolJWTUtil.createToken(wxMember);
+        Map<String,String> wxMap = new HashMap<>();
+        wxMap.put("id",wxMember.getId().toString());
+        String studentToken = JWTUtil.getToken(wxMap);
         wxMember.setStudentToken(studentToken);
         model.addAttribute("dbEduStudent",wxMember);
         model.addAttribute("frontUrl", wechatConfig.getFrontUrl());

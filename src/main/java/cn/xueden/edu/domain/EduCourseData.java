@@ -34,7 +34,7 @@ public class EduCourseData extends BaseEntity {
     /**
      * 资料下载地址
      */
-    private String download_address;
+    private String downloadAddress;
 
     /**
      * 文件标志

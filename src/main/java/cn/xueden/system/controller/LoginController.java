@@ -5,8 +5,10 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.system.domain.SysUser;
 import cn.xueden.system.service.ISysUserService;
 
-import cn.xueden.utils.HutoolJWTUtil;
+
+import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.Md5Util;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +55,9 @@ public class LoginController {
             return BaseResult.fail("登录失败，账号被封禁");
         }else {
             // 生成token
-            String token = HutoolJWTUtil.createToken(dbSysUser);
+            Map<String,String> userMap = new HashMap<>();
+            userMap.put("id",dbSysUser.getId().toString());
+            String token = JWTUtil.getToken(userMap);
             request.getServletContext().setAttribute("token",token);
 
             // 返回登录用户信息

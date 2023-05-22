@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/hotel_system?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8&useSSL=false&tinyInt1isBit=true
+    password: 41C3ofPlTNsCpoUiaUVP!
+    url: jdbc:mysql://localhost:3306/edu_system_go?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8&useSSL=false&tinyInt1isBit=true
     hikari:
       minimum-idle: 10 # ????????
       maximum-pool-size: 10 # ????????????10
@@ -31,7 +31,7 @@ spring:
             class: javax.net.ssl.SSLSocketFactory
 # 用户头像存放路径
 user:
-  icon: /home/hotel/file/
+  icon: /home/edu-go/file/
 
 aliyun: #阿里云 vod
   vod: #不同的服务器，地址不同
@@ -59,9 +59,9 @@ wechatpay:
   #  微信公众平台服务号appId
   appId: wx35ab526714d35ec8
   #  v3接口 CA证书 apiclient_key.pem私钥内容
-  privateKey: /var/xueden/wxpay/apiclient_key.pem
+  privateKey: /home/zhijie/edu-go/wxpay/apiclient_key.pem
   #  wechatpay.pem证书内容 必填  填写classpath路径 位于 maven项目的resources文件下
-  wechatpaykey: /var/xueden/wxpay/wechatpay_1AE730C43AEF378DF327266692F3BB9567C42A00.pem
+  wechatpaykey: /home/zhijie/edu-go/wxpay/wechatpay_1AE730C43AEF378DF327266692F3BB9567C42A00.pem
   #  商户证书序列号 CA证书 可查看微信商户平台-账户设置-安全设置-api安全密钥
   mcHserialNo: 6190F6345D8B5D3DFD4CF540DB97FA730357C7F9
   # native支付请求接口
@@ -72,3 +72,10 @@ wechatpay:
   notifyVipUrl: http://gateway.xueden.cn/edu/pay/wxVipCallback
   # apiv3密钥
   aPIv3key: 58a557e3b2c3b96cb4780e6856f38dce
+
+# 微信扫码登录配置
+wxcode:
+  appId: wx7aa745fb92387941
+  appSecret: c96a807ad4c892c4b6001af113c839ca
+  redirectUri: http://dev01.sv1.k9s.run:2271/wechat/callback
+  frontUrl: http://www.xueden.cn/

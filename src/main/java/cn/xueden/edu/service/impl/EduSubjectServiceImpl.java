@@ -166,4 +166,24 @@ public class EduSubjectServiceImpl implements IEduSubjectService {
         }
         return eduSubjectVOList;
     }
+
+    /**
+     * 获取一级分类
+     * @param parentId
+     * @return
+     */
+    @Override
+    public List<EduSubject> getListByParentId(Long parentId) {
+        return eduSubjectRepository.getListByParentId(parentId);
+    }
+
+    /**
+     * 获取所有子分类,不包含父节点
+     * @param l
+     * @return
+     */
+    @Override
+    public List<EduSubject> getListByParentIdNot(long l) {
+        return eduSubjectRepository.getListByParentIdNot(l);
+    }
 }

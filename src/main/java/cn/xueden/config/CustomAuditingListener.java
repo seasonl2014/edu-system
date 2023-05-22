@@ -1,6 +1,8 @@
 package cn.xueden.config;
 
-import cn.xueden.utils.HutoolJWTUtil;
+
+import cn.xueden.utils.JWTUtil;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
@@ -102,20 +104,20 @@ public class CustomAuditingListener {
         if(null==token&&null==memberToken){
             return 1L;
         } else if (null==token&&null!=memberToken&&memberToken.trim().length()>0) {
-            Long memberID = HutoolJWTUtil.parseToken(memberToken);
-            return memberID;
+            DecodedJWT decodedJWT = JWTUtil.verify(memberToken);
+            return decodedJWT.getClaim("id").asLong();
         } else if (StringUtils.isNotBlank(token)&&StringUtils.isBlank(memberToken)){
-            Long userID = HutoolJWTUtil.parseToken(token);
-            return userID;
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            return decodedJWT.getClaim("id").asLong();
         } else if (StringUtils.isNotBlank(token)&&null!=memberToken&&memberToken.trim().length()>0) {
             String uri = request.getRequestURI();
             // 说明是前台访问路径
             if(uri.indexOf("hotel")!=-1){
-                Long memberID = HutoolJWTUtil.parseToken(memberToken);
-                return memberID;
+                DecodedJWT decodedJWT = JWTUtil.verify(memberToken);
+                return decodedJWT.getClaim("id").asLong();
             }else {
-                Long userID = HutoolJWTUtil.parseToken(token);
-                return userID;
+                DecodedJWT decodedJWT = JWTUtil.verify(token);
+                return decodedJWT.getClaim("id").asLong();
             }
         }
         return 1L;

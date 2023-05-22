@@ -25,4 +25,18 @@ public interface EduSubjectRepository extends JpaRepository<EduSubject, Long>, J
      * @return
      */
     List<EduSubject> findByParentId(Long parentId, Pageable subPageable);
+
+    /**
+     * 获取一级分类列表
+     * @param parentId
+     * @return
+     */
+    List<EduSubject> getListByParentId(Long parentId);
+
+    /**
+     * 获取所有子分类,不包含父节点
+     * @param l
+     * @return
+     */
+    List<EduSubject> getListByParentIdNot(long l);
 }

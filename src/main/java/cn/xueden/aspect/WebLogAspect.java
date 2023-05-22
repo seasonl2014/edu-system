@@ -133,7 +133,12 @@ public class WebLogAspect {
         String retString = JSONUtil.toJsonStr(ret);
         sysLog.setResponse(retString.length()>5000? JSONUtil.toJsonStr("请求参数数据过长不与显示"):retString);
         sysLog.setUseTime(System.currentTimeMillis() - startTime.get());
-        logRepository.save(sysLog);
+        try {
+            logRepository.saveAndFlush(sysLog);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     /**

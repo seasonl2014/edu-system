@@ -220,7 +220,7 @@ public class XuedenUtil {
      */
     public static IpInfo getCityInfo(String ip) throws IOException {
         // 服务器存放的路径
-        String dbPath = "/usr/local/hotel/ip2region.xdb";
+        String dbPath = "/home/zhijie/edu-go/ip2region.xdb";
         // 本地电脑存放的路径
         //String dbPath = "G:\\hotel\\ip2region.xdb";
         Searcher searcher = null;

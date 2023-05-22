@@ -4,20 +4,17 @@ import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.utils.AliyunVODSDKUtils;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
-import cn.xueden.edu.domain.EduCourse;
-import cn.xueden.edu.domain.EduStudentBuyCourse;
-import cn.xueden.edu.domain.EduStudentBuyVip;
-import cn.xueden.edu.domain.EduTeacher;
+import cn.xueden.edu.domain.*;
 import cn.xueden.edu.service.*;
 import cn.xueden.edu.vo.EduCourseModel;
-import cn.xueden.edu.wechat.dto.AmountDto;
-import cn.xueden.edu.wechat.dto.WxOrderDto;
-import cn.xueden.utils.HutoolJWTUtil;
+
+import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.XuedenUtil;
-import com.alibaba.fastjson.JSONObject;
+
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthRequest;
 import com.aliyuncs.vod.model.v20170321.GetVideoPlayAuthResponse;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -52,13 +49,19 @@ public class EduDetailController {
 
     private final IEduStudentBuyVipService eduStudentBuyVipService;
 
-    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService) {
+    private final IEduCourseVideoService eduCourseVideoService;
+
+    private final IEduCourseDataService eduCourseDataService;
+
+    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseVideoService eduCourseVideoService, IEduCourseDataService eduCourseDataService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseChapterService = eduCourseChapterService;
         this.teacherService = teacherService;
         this.eduStudentBuyCourseService = eduStudentBuyCourseService;
         this.eduStudentBuyVipService = eduStudentBuyVipService;
+        this.eduCourseVideoService = eduCourseVideoService;
+        this.eduCourseDataService = eduCourseDataService;
     }
 
     @EnableSysLog("【前台】根据课程ID获取课程详情详细")
@@ -82,24 +85,36 @@ public class EduDetailController {
 
         // 判断是否有观看视频权限
         String token = request.getHeader("studentToken");
-        if(token!= null && !token.equals("null")){
+        boolean isCanViewVideo = canViewVideo(token, eduCourseModel.getId());
+        eduCourseModel.setViewVideo(isCanViewVideo);
+        return BaseResult.success(eduCourseModel);
+    }
+
+    /**
+     * 判断是否有观看该课程的权限
+     * @param token
+     * @param courseId
+     * @return
+     */
+    private boolean canViewVideo(String token,Long courseId){
+        if(token!= null && !token.equals("null")&& !token.equals("")){
             // 获取登录学员ID
-            Long studentId= HutoolJWTUtil.parseToken(token);
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= decodedJWT.getClaim("id").asLong();
             // 是否是VIP会员
-          EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipService.findByStudentId(studentId);
-          if(dbEduStudentBuyVip!=null&&dbEduStudentBuyVip.getIsPayment()==1){
-              eduCourseModel.setViewVideo(true);
-          // 是否已经购买课程
-          }else{
-              EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseService.findByCourseIdAndStudentId(id,studentId);
-              if(dbEduStudentBuyCourse!=null && dbEduStudentBuyCourse.getIsPayment()==1){
-                  eduCourseModel.setViewVideo(true);
-              }
-          }
+            EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipService.findByStudentId(studentId);
+            if(dbEduStudentBuyVip!=null&&dbEduStudentBuyVip.getIsPayment()==1){
+               return true;
+                // 是否已经购买课程
+            }else{
+                EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseService.findByCourseIdAndStudentId(courseId,studentId);
+                if(dbEduStudentBuyCourse!=null && dbEduStudentBuyCourse.getIsPayment()==1){
+                   return true;
+                }
+            }
 
         }
-
-        return BaseResult.success(eduCourseModel);
+        return false;
     }
 
     @EnableSysLog("【前台】根据课程ID获取相应的开发环境参数数据")
@@ -119,6 +134,16 @@ public class EduDetailController {
             return BaseResult.fail("获取数据失败！");
         }else {
             return BaseResult.success(eduCourseChapterService.getEduCourseChapterListByCourseId(courseId));
+        }
+    }
+
+    @EnableSysLog("【前台】根据课程ID获取相应的课程资料数据")
+    @GetMapping("/getCourseDataByCourseId/{courseId}")
+    public BaseResult getCourseDataByCourseId(@PathVariable Long courseId){
+        if(null == courseId){
+            return BaseResult.fail("获取数据失败");
+        }else {
+            return BaseResult.success(eduCourseDataService.getCourseDataByCourseId(courseId));
         }
     }
 
@@ -200,4 +225,39 @@ public class EduDetailController {
         resultMap.put("courseId",dbEduCourse.getId());
         return BaseResult.success(resultMap);
     }
+
+    @EnableSysLog("【前台】播放页组件根据视频ID获取视频信息")
+    @GetMapping("/video/{id}")
+    public BaseResult getVideoById(@PathVariable Long id,
+                                   HttpServletRequest request){
+        String token = request.getHeader("studentToken");
+        EduCourseVideo dbEduCourseVideo = eduCourseVideoService.findById(id);
+        boolean isCanViewVideo = canViewVideo(token,dbEduCourseVideo.getCourseId());
+        if(isCanViewVideo){
+            Map<String,Object> resultMap = new HashMap<>();
+            EduCourse eduCourse = eduCourseService.getById(dbEduCourseVideo.getCourseId());
+            resultMap.put("video",dbEduCourseVideo);
+            resultMap.put("course",eduCourse);
+            return BaseResult.success(resultMap);
+        }else {
+            return BaseResult.fail("你没有观看视频的权限！");
+        }
+
+    }
+
+
+    @EnableSysLog("【前台】下载课程资料")
+    @GetMapping("download/{courseDataId}")
+    public BaseResult download(@PathVariable Long courseDataId,
+                               HttpServletRequest request){
+        String token = request.getHeader("studentToken");
+        EduCourseData dbEduCourseData = eduCourseDataService.getById(courseDataId);
+        boolean isCanViewVideo = canViewVideo(token,dbEduCourseData.getCourseId());
+        if(isCanViewVideo){
+            return BaseResult.success(dbEduCourseData);
+        }else {
+            return BaseResult.fail("下载失败，请先购买课程或加入齐天大会员");
+        }
+    }
+
 }

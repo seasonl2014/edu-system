@@ -11,14 +11,20 @@ import cn.xueden.edu.service.IEduStudentService;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
+import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.*;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**功能描述：学生信息业务接口实现类
  * @author:梁志杰
@@ -28,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class EduStudentServiceImpl implements IEduStudentService {
 
     private final EduStudentRepository studentRepository;
@@ -131,13 +138,16 @@ public class EduStudentServiceImpl implements IEduStudentService {
             return BaseResult.fail("登录失败，该账号已被冻结，请联系客服！");
         }else {
            // 更新登录次数
-            Integer loginTimes = student.getLoginTimes()==null?1:student.getLoginTimes()+1;
+            Integer loginTimes = dbEduStudent.getLoginTimes()==null?1:dbEduStudent.getLoginTimes()+1;
             dbEduStudent.setLoginTimes(loginTimes);
             studentRepository.save(dbEduStudent);
         }
-
+         log.info("------------------开始生成token");
         // 生成token
-        String token = HutoolJWTUtil.createToken(dbEduStudent);
+        Map<String, String> map = new HashMap<>();
+        map.put("id",dbEduStudent.getId().toString());
+        String token = JWTUtil.getToken(map);
+        log.info("------------------生成token结束",token);
         dbEduStudent.setStudentToken(token);
         return BaseResult.success(dbEduStudent);
     }
@@ -150,5 +160,22 @@ public class EduStudentServiceImpl implements IEduStudentService {
     @Override
     public EduStudent getByOpenid(String openid) {
         return studentRepository.getByWxOpenId(openid);
+    }
+
+    /**
+     * 学员修改个人信息
+     * @param studentId
+     * @param studentInfoModel
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void update(Long studentId, UpdateStudentInfoModel studentInfoModel) {
+        if(studentId.equals(studentInfoModel.getId())){
+            EduStudent dbEduStudent = studentRepository.findById(studentId).orElseGet(EduStudent::new);
+            BeanUtils.copyProperties(studentInfoModel,dbEduStudent);
+            studentRepository.saveAndFlush(dbEduStudent);
+        }else {
+            throw new BadRequestException("修改失败，只能修改自己的个人信息");
+        }
     }
 }

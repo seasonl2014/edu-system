@@ -57,4 +57,18 @@ public interface IEduSubjectService {
      * @return
      */
     List<EduSubjectModel> getIndexColumnCourses(EduSubjectQueryCriteria queryCriteria, Pageable pageable);
+
+    /**
+     * 获取一级分类
+     * @param i
+     * @return
+     */
+    List<EduSubject> getListByParentId(Long parentId);
+
+    /**
+     * 获取所有子分类,不包含父节点
+     * @param l
+     * @return
+     */
+    List<EduSubject> getListByParentIdNot(long l);
 }

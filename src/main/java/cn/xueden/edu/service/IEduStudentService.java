@@ -5,6 +5,7 @@ import cn.xueden.edu.domain.EduStudent;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
+import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import org.springframework.data.domain.Pageable;
 
 /**功能描述：学生管理业务接口
@@ -67,4 +68,11 @@ public interface IEduStudentService {
      * @return
      */
     EduStudent getByOpenid(String openid);
+
+    /**
+     * 学员修改个人信息
+     * @param studentId
+     * @param eduStudent
+     */
+    void update(Long studentId, UpdateStudentInfoModel studentInfoModel);
 }

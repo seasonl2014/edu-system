@@ -11,6 +11,7 @@ import cn.xueden.system.service.dto.UserQueryCriteria;
 
 import cn.xueden.system.vo.ModifyPwdModel;
 import cn.xueden.utils.*;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -161,7 +162,8 @@ public class UserController {
         // 获取登录用户ID
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = (String) request.getServletContext().getAttribute("token");
-        Long userId = HutoolJWTUtil.parseToken(token);
+        DecodedJWT decodedJWT = JWTUtil.verify(token);
+        Long userId= decodedJWT.getClaim("id").asLong();
         sysUser.setId(userId);
         sysUserService.editUser(sysUser);
         return BaseResult.success("更新成功");
@@ -180,7 +182,8 @@ public class UserController {
         if(email==null || email==""){
             // 获取登录用户ID
             String token = (String) request.getServletContext().getAttribute("token");
-            Long userId = HutoolJWTUtil.parseToken(token);
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long userId= decodedJWT.getClaim("id").asLong();
             SysUser dbSysUser = sysUserService.getById(userId);
             email = dbSysUser.getEmail();
         }
@@ -243,7 +246,8 @@ public class UserController {
 
         // 登录用户ID
         String token = (String) request.getServletContext().getAttribute("token");
-        Long userId = HutoolJWTUtil.parseToken(token);
+        DecodedJWT decodedJWT = JWTUtil.verify(token);
+        Long userId= decodedJWT.getClaim("id").asLong();
         SysUser sysUser = new SysUser();
         sysUser.setId(userId);
         sysUser.setEmail(email);
@@ -266,7 +270,8 @@ public class UserController {
             return BaseResult.fail("更新失败");
         }
         String token = (String) request.getServletContext().getAttribute("token");
-        Long userId = HutoolJWTUtil.parseToken(token);
+        DecodedJWT decodedJWT = JWTUtil.verify(token);
+        Long userId= decodedJWT.getClaim("id").asLong();
         modifyPwdModel.setUserId(userId);
         boolean result = sysUserService.updatePwd(modifyPwdModel);
         if(result){

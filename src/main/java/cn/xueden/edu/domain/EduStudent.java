@@ -106,6 +106,12 @@ public class EduStudent extends BaseEntity {
     @Transient
     private String studentToken;
 
+    /**
+     * 会员类型
+     */
+    @Transient
+    private String vipType;
+
 
 
     @Override

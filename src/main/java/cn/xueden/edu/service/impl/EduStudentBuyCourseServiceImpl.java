@@ -10,9 +10,11 @@ import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
 import cn.xueden.exception.BadRequestException;
-import cn.xueden.utils.HutoolJWTUtil;
+
 import cn.xueden.utils.IpInfo;
+import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.XuedenUtil;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +65,8 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
                 }
             }
             // 获取学员信息
-            Long studentId = HutoolJWTUtil.parseToken(token);
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= decodedJWT.getClaim("id").asLong();
             if(null==studentId){
                 throw new BadRequestException("购买失败，请先登录！");
             }else {
