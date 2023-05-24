@@ -100,7 +100,7 @@ public class EduDetailController {
         if(token!= null && !token.equals("null")&& !token.equals("")){
             // 获取登录学员ID
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            Long studentId= decodedJWT.getClaim("id").asLong();
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
             // 是否是VIP会员
             EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipService.findByStudentId(studentId);
             if(dbEduStudentBuyVip!=null&&dbEduStudentBuyVip.getIsPayment()==1){

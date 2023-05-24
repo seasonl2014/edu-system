@@ -5,6 +5,8 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.service.IEduStudentIdService;
 import cn.xueden.edu.service.IEduStudentService;
+import cn.xueden.utils.XuedenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +30,10 @@ public class EduLoginController {
 
     @EnableSysLog("【前台】学员登录")
     @PostMapping("login")
-    public BaseResult login(@RequestBody EduStudent student){
-        return studentService.login(student);
+    public BaseResult login(@RequestBody EduStudent student,
+                            HttpServletRequest request){
+        // 获取用户IP地址
+        String ipAddress = XuedenUtil.getClientIp(request);
+        return studentService.login(student,ipAddress);
     }
 }

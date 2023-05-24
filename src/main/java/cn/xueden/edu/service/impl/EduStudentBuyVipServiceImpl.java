@@ -79,13 +79,14 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
 
             // 获取学员信息
             DecodedJWT decodedJWT = JWTUtil.verify(studentToken);
-            Long studentId= decodedJWT.getClaim("id").asLong();
+            String studentId= decodedJWT.getClaim("studentId").asString();
             EduStudent tempEduStudent = null;
             if(null==studentId){
                 throw new BadRequestException("购买失败，请先登录！");
             }else {
+                Long dbStudentId = Long.parseLong(studentId);
                 // 判断学员是否已经下单了
-                EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipRepository.findByStudentId(studentId);
+                EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipRepository.findByStudentId(dbStudentId);
                 if(dbEduStudentBuyVip!=null){
                     // 待付款
                     if(dbEduStudentBuyVip.getIsPayment()==0){
@@ -102,11 +103,11 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
                     // 生成订单编号
                     String orderNo= XuedenUtil.createOrderNumber();
                     tempEduStudentBuyVip.setIsPayment(0);
-                    tempEduStudentBuyVip.setStudentId(studentId);
+                    tempEduStudentBuyVip.setStudentId(dbStudentId);
                     tempEduStudentBuyVip.setOrderNo(orderNo);
                     tempEduStudentBuyVip.setVipId(id);
-                    tempEduStudentBuyVip.setCreateBy(studentId);
-                    tempEduStudentBuyVip.setUpdateBy(studentId);
+                    tempEduStudentBuyVip.setCreateBy(dbStudentId);
+                    tempEduStudentBuyVip.setUpdateBy(dbStudentId);
 
                     // 获取VIP类型的价格
                     EduVipType dbEduVipType = eduVipTypeRepository.getReferenceById(id);

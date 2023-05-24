@@ -60,7 +60,7 @@ public interface IEduStudentService {
      * @param student
      * @return
      */
-    BaseResult login(EduStudent student);
+    BaseResult login(EduStudent student,String ipAddress);
 
     /**
      * 根据openid获取学员信息

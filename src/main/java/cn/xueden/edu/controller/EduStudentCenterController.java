@@ -39,7 +39,7 @@ public class EduStudentCenterController {
         if(token!= null && !token.equals("null")&& !token.equals("")){
             // 获取登录学员ID
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            Long studentId= decodedJWT.getClaim("id").asLong();
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
             EduStudent dbEduStudent = eduStudentService.getById(studentId);
 
             // 获取学员是否VIP会员
@@ -61,7 +61,7 @@ public class EduStudentCenterController {
         if(token!= null && !token.equals("null")&& !token.equals("")){
             // 获取登录学员ID
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            Long studentId= decodedJWT.getClaim("id").asLong();
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
             eduStudentService.update(studentId,studentInfoModel);
             return BaseResult.success("更新成功！");
         }else {

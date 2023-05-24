@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,7 +128,7 @@ public class EduStudentServiceImpl implements IEduStudentService {
     }
 
     @Override
-    public BaseResult login(EduStudent student) {
+    public BaseResult login(EduStudent student,String ipAddress) {
         // 根据手机号获取学员信息
         EduStudent dbEduStudent = studentRepository.findByPhone(student.getPhone());
         if(dbEduStudent==null){
@@ -140,17 +141,30 @@ public class EduStudentServiceImpl implements IEduStudentService {
            // 更新登录次数
             Integer loginTimes = dbEduStudent.getLoginTimes()==null?1:dbEduStudent.getLoginTimes()+1;
             dbEduStudent.setLoginTimes(loginTimes);
+            try {
+                IpInfo ipInfo = XuedenUtil.getCityInfo(ipAddress);
+                if(null!=ipInfo){
+                    dbEduStudent.setArea(ipInfo.getRegion());
+                    dbEduStudent.setProvince(ipInfo.getProvince());
+                    dbEduStudent.setCity(ipInfo.getCity());
+                    dbEduStudent.setIsp(ipInfo.getIsp());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             studentRepository.save(dbEduStudent);
         }
          log.info("------------------开始生成token");
         // 生成token
         Map<String, String> map = new HashMap<>();
-        map.put("id",dbEduStudent.getId().toString());
+        map.put("studentId",dbEduStudent.getId().toString());
+        map.put("phone",dbEduStudent.getPhone());
         String token = JWTUtil.getToken(map);
         log.info("------------------生成token结束",token);
         dbEduStudent.setStudentToken(token);
         return BaseResult.success(dbEduStudent);
     }
+
 
     /**
      * 根据openid获取学员信息

@@ -66,13 +66,14 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
             }
             // 获取学员信息
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            Long studentId= decodedJWT.getClaim("id").asLong();
+            String studentId= decodedJWT.getClaim("studentId").asString();
+            String phone= decodedJWT.getClaim("phone").asString();
             if(null==studentId){
                 throw new BadRequestException("购买失败，请先登录！");
             }else {
-
+                 Long dbStudentId = Long.parseLong(studentId);
                 // 判断学员是否已经购买过该课程
-                EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseRepository.findByStudentIdAndCourseId(studentId,id);
+                EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseRepository.findByStudentIdAndCourseId(dbStudentId,id);
                 if(dbEduStudentBuyCourse!=null){
                     // 待付款
                     if(dbEduStudentBuyCourse.getIsPayment()==0){
@@ -93,10 +94,10 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
                     tempEduStudentBuyCourse.setCourseId(id);
                     tempEduStudentBuyCourse.setPrice(dhEduCourse.getPrice());
                     tempEduStudentBuyCourse.setIsPayment(0);
-                    tempEduStudentBuyCourse.setStudentId(studentId);
+                    tempEduStudentBuyCourse.setStudentId(dbStudentId);
                     tempEduStudentBuyCourse.setOrderNo(orderNo);
-                    tempEduStudentBuyCourse.setCreateBy(studentId);
-                    tempEduStudentBuyCourse.setUpdateBy(studentId);
+                    tempEduStudentBuyCourse.setCreateBy(dbStudentId);
+                    tempEduStudentBuyCourse.setUpdateBy(dbStudentId);
                     tempEduStudentBuyCourse.setTeacherId(dhEduCourse.getTeacherId());
                     tempEduStudentBuyCourse.setRemarks("学员购买课程【"+dhEduCourse.getShortTitle()+"】");
                     eduStudentBuyCourseRepository.save(tempEduStudentBuyCourse);

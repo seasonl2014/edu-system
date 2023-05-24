@@ -100,24 +100,24 @@ public class CustomAuditingListener {
         // 获取登录用户ID
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = (String) request.getHeader("userToken");
-        String memberToken = (String) request.getHeader("memberToken");
-        if(null==token&&null==memberToken){
+        String studentToken = (String) request.getHeader("studentToken");
+        if(null==token&&null==studentToken){
             return 1L;
-        } else if (null==token&&null!=memberToken&&memberToken.trim().length()>0) {
-            DecodedJWT decodedJWT = JWTUtil.verify(memberToken);
-            return decodedJWT.getClaim("id").asLong();
-        } else if (StringUtils.isNotBlank(token)&&StringUtils.isBlank(memberToken)){
+        } else if (null==token&&null!=studentToken&&studentToken.trim().length()>0) {
+            DecodedJWT decodedJWT = JWTUtil.verify(studentToken);
+            return Long.parseLong(decodedJWT.getClaim("studentId").asString());
+        } else if (StringUtils.isNotBlank(token)&&StringUtils.isBlank(studentToken)){
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            return decodedJWT.getClaim("id").asLong();
-        } else if (StringUtils.isNotBlank(token)&&null!=memberToken&&memberToken.trim().length()>0) {
+            return Long.parseLong(decodedJWT.getClaim("id").asString());
+        } else if (StringUtils.isNotBlank(token)&&null!=studentToken&&studentToken.trim().length()>0) {
             String uri = request.getRequestURI();
             // 说明是前台访问路径
-            if(uri.indexOf("hotel")!=-1){
-                DecodedJWT decodedJWT = JWTUtil.verify(memberToken);
-                return decodedJWT.getClaim("id").asLong();
+            if(uri.indexOf("edu")!=-1){
+               DecodedJWT decodedJWT = JWTUtil.verify(studentToken);
+               return Long.parseLong(decodedJWT.getClaim("studentId").asString());
             }else {
                 DecodedJWT decodedJWT = JWTUtil.verify(token);
-                return decodedJWT.getClaim("id").asLong();
+                return Long.parseLong(decodedJWT.getClaim("id").asString());
             }
         }
         return 1L;

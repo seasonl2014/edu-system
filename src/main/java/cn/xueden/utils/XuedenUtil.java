@@ -219,45 +219,51 @@ public class XuedenUtil {
      * 根据ip获取详细地址
      */
     public static IpInfo getCityInfo(String ip) throws IOException {
-        // 服务器存放的路径
-        String dbPath = "/home/zhijie/edu-go/ip2region.xdb";
-        // 本地电脑存放的路径
-        //String dbPath = "G:\\hotel\\ip2region.xdb";
-        Searcher searcher = null;
-        IpInfo ipInfo = new IpInfo();
-        try {
-            searcher = Searcher.newWithFileOnly(dbPath);
-        } catch (IOException e) {
-            System.out.printf("failed to create searcher with `%s`: %s\n", dbPath, e);
+        IpInfo ipInfo = null;
+        if("0.0.0.0".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip) || "localhost".equals(ip) || "127.0.0.1".equals(ip)){
+            ip = "127.0.0.1";
         }
-
-        // 2、查询
-        try {
-            long sTime = System.nanoTime();
-            String region = searcher.search(ip);
-            if (region == null) {
-                return null;
+        if(!"127.0.0.1".equals(ip)){
+            // 服务器存放的路径
+            String dbPath = "/home/zhijie/edu-go/ip2region.xdb";
+            // 本地电脑存放的路径
+            //String dbPath = "G:\\hotel\\ip2region.xdb";
+            Searcher searcher = null;
+            ipInfo = new IpInfo();
+            try {
+                searcher = Searcher.newWithFileOnly(dbPath);
+            } catch (IOException e) {
+                System.out.printf("failed to create searcher with `%s`: %s\n", dbPath, e);
             }
 
-            String[] splitInfos = SPLIT_PATTERN.split(region);
-            // 补齐5位
-            if (splitInfos.length < 5) {
-                splitInfos = Arrays.copyOf(splitInfos, 5);
+            // 2、查询
+            try {
+                long sTime = System.nanoTime();
+                String region = searcher.search(ip);
+                if (region == null) {
+                    return null;
+                }
+
+                String[] splitInfos = SPLIT_PATTERN.split(region);
+                // 补齐5位
+                if (splitInfos.length < 5) {
+                    splitInfos = Arrays.copyOf(splitInfos, 5);
+                }
+                ipInfo.setCountry(filterZero(splitInfos[0]));
+                ipInfo.setRegion(filterZero(splitInfos[1]));
+                ipInfo.setProvince(filterZero(splitInfos[2]));
+                ipInfo.setCity(filterZero(splitInfos[3]));
+                ipInfo.setIsp(filterZero(splitInfos[4]));
+
+                long cost = TimeUnit.NANOSECONDS.toMicros((long) (System.nanoTime() - sTime));
+                System.out.printf("{region: %s, ioCount: %d, took: %d μs}\n", region, searcher.getIOCount(), cost);
+            } catch (Exception e) {
+                System.out.printf("failed to search(%s): %s\n", ip, e);
             }
-            ipInfo.setCountry(filterZero(splitInfos[0]));
-            ipInfo.setRegion(filterZero(splitInfos[1]));
-            ipInfo.setProvince(filterZero(splitInfos[2]));
-            ipInfo.setCity(filterZero(splitInfos[3]));
-            ipInfo.setIsp(filterZero(splitInfos[4]));
 
-            long cost = TimeUnit.NANOSECONDS.toMicros((long) (System.nanoTime() - sTime));
-            System.out.printf("{region: %s, ioCount: %d, took: %d μs}\n", region, searcher.getIOCount(), cost);
-        } catch (Exception e) {
-            System.out.printf("failed to search(%s): %s\n", ip, e);
+            // 3、关闭资源
+            searcher.close();
         }
-
-        // 3、关闭资源
-        searcher.close();
 
         return ipInfo;
     }
