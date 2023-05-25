@@ -60,6 +60,12 @@ public class EduStudentBuyCourse extends BaseEntity {
      */
     private String payChannel;
 
+    /**
+     * 课程
+     */
+    @Transient
+    private EduCourse eduCourse;
+
 
 
 }

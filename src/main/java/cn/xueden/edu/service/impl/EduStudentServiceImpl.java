@@ -3,8 +3,12 @@ package cn.xueden.edu.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.xueden.base.BaseResult;
+import cn.xueden.edu.domain.EduCourse;
 import cn.xueden.edu.domain.EduStudent;
+import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduStudentId;
+import cn.xueden.edu.repository.EduCourseRepository;
+import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
 import cn.xueden.edu.repository.EduStudentIdRepository;
 import cn.xueden.edu.repository.EduStudentRepository;
 import cn.xueden.edu.service.IEduStudentService;
@@ -13,11 +17,11 @@ import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import cn.xueden.exception.BadRequestException;
+import cn.xueden.sms.SendSmsService;
 import cn.xueden.utils.*;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**功能描述：学生信息业务接口实现类
@@ -42,9 +47,15 @@ public class EduStudentServiceImpl implements IEduStudentService {
 
     private final EduStudentIdRepository eduStudentIdRepository;
 
-    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository) {
+    private final EduStudentBuyCourseRepository eduStudentBuyCourseRepository;
+
+    private final EduCourseRepository eduCourseRepository;
+
+    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository) {
         this.studentRepository = studentRepository;
         this.eduStudentIdRepository = eduStudentIdRepository;
+        this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
+        this.eduCourseRepository = eduCourseRepository;
     }
 
     /**
@@ -191,5 +202,53 @@ public class EduStudentServiceImpl implements IEduStudentService {
         }else {
             throw new BadRequestException("修改失败，只能修改自己的个人信息");
         }
+    }
+
+    /**
+     * 个人中心获取学员我的课程
+     * @param studentId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object getMyCourseList(Long studentId, Pageable pageable) {
+        // 1表示已经付款成功的课程
+        Page<EduStudentBuyCourse> page = eduStudentBuyCourseRepository.findListByStudentIdAndIsPayment(studentId,1,pageable);
+        setEduCourse(page.stream().toList());
+        return PageUtil.toPage(page);
+    }
+
+    private List<EduStudentBuyCourse> setEduCourse(List<EduStudentBuyCourse> eduStudentBuyCourseList){
+        for (EduStudentBuyCourse eduStudentBuyCourse: eduStudentBuyCourseList){
+            EduCourse tempEduCourse = eduCourseRepository.getReferenceById(eduStudentBuyCourse.getCourseId());
+            eduStudentBuyCourse.setEduCourse(tempEduCourse);
+        }
+        return eduStudentBuyCourseList;
+    }
+
+    /**
+     * 绑定邮箱
+     * @param email
+     * @param studentId
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void bindEmail(String email, Long studentId) {
+        // 获取学员信息
+        EduStudent eduStudent = studentRepository.getReferenceById(studentId);
+        eduStudent.setEmail(email);
+        studentRepository.save(eduStudent);
+    }
+
+    /**
+     * 个人中心发送手机验证码
+     * @param phone
+     * @param studentId
+     */
+    @Override
+    public void sendSms(String phone, Long studentId) {
+        // 随机生成6位数数
+        Integer code = XuedenUtil.randomSixNums();
+        SendSmsService.SendCodeByPhone(code.toString(),phone);
     }
 }

@@ -72,7 +72,30 @@ public interface IEduStudentService {
     /**
      * 学员修改个人信息
      * @param studentId
-     * @param eduStudent
+     * @param studentInfoModel
      */
     void update(Long studentId, UpdateStudentInfoModel studentInfoModel);
+
+
+    /**
+     * 个人中心获取学员我的课程
+     * @param token
+     * @param pageable
+     * @return
+     */
+    Object getMyCourseList(Long studentId, Pageable pageable);
+
+    /**
+     * 绑定邮箱
+     * @param email
+     * @param studentId
+     */
+    void bindEmail(String email, Long studentId);
+
+    /**
+     * 个人中心发送手机验证码
+     * @param phone
+     * @param studentId
+     */
+    void sendSms(String phone, Long studentId);
 }

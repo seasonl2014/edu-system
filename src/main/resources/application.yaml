@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: MyNewPass5!
-    url: jdbc:mysql://192.168.0.40:3306/edu_system?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    url: jdbc:mysql://192.168.0.40:3306/edu_system?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true
     hikari:
       minimum-idle: 10 # ????????
       maximum-pool-size: 10 # ????????????10
@@ -53,8 +53,8 @@ aliyun: #阿里云 vod
       hostpath: http://alioss.xueden.cn # 上传图片回显路径
   sms:
     regionid: cn-hangzhou
-    signname: 墨鱼课堂
-    templatecode: SMS_209832260
+    signname: 学灯网
+    templatecode: SMS_278275512
 
 # 微信支付配置信息
 wechatpay:

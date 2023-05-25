@@ -1,8 +1,12 @@
 package cn.xueden.edu.repository;
 
 import cn.xueden.edu.domain.EduStudentBuyCourse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.List;
 
 /**功能描述：学员购买课程持久层
  * @author Administrator
@@ -37,4 +41,13 @@ public interface EduStudentBuyCourseRepository extends JpaRepository<EduStudentB
      * @return
      */
     EduStudentBuyCourse findByCourseIdAndStudentId(Long courseId, Long studentId);
+
+    /**
+     * 个人中心获取学员我的课程
+     * @param studentId
+     * @param isPayment
+     * @param pageable
+     * @return
+     */
+    Page<EduStudentBuyCourse>  findListByStudentIdAndIsPayment(Long studentId, int isPayment, Pageable pageable);
 }

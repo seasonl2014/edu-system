@@ -69,7 +69,7 @@ public class EduDetailController {
     public BaseResult detail(@PathVariable Long id,
                              HttpServletRequest request){
         EduCourse dbEduCourse = eduCourseService.getById(id);
-        dbEduCourse.setViewCount(dbEduCourse.getViewCount()+1);
+        dbEduCourse.setViewCount(dbEduCourse.getViewCount()==null?1:dbEduCourse.getViewCount()+1);
         eduCourseService.editCourse(dbEduCourse);
         // 获取讲师信息
         EduTeacher eduTeacher = teacherService.getById(dbEduCourse.getTeacherId());

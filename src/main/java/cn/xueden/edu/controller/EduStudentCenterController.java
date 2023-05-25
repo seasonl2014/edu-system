@@ -8,9 +8,14 @@ import cn.xueden.edu.service.IEduStudentBuyVipService;
 import cn.xueden.edu.service.IEduStudentService;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 
+import cn.xueden.system.domain.SysUser;
 import cn.xueden.utils.JWTUtil;
+import cn.xueden.utils.PageVo;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 /**功能描述：前台个人中前端控制器
@@ -67,6 +72,86 @@ public class EduStudentCenterController {
         }else {
             return BaseResult.fail("修改失败，请先登录！");
         }
+    }
+
+    @EnableSysLog("【前台】个人中心获取学员我的课程")
+    @GetMapping("getMyCourseList")
+    public BaseResult getMyCourseList(PageVo pageVo, HttpServletRequest request){
+
+        Pageable pageable = PageRequest.of(pageVo.getPageIndex()-1, pageVo.getPageSize(),
+                Sort.Direction.DESC,"id");
+
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+           return BaseResult.success(eduStudentService.getMyCourseList(studentId,pageable));
+        }else {
+            return BaseResult.fail("获取数据失败，请先登录！");
+        }
+    }
+
+    @EnableSysLog("【前台】个人中心获取我的VIP记录")
+    @GetMapping("getMyVipList")
+    public BaseResult getMyVipList(HttpServletRequest request){
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            return BaseResult.success(eduStudentBuyVipService.findByStudentId(studentId));
+        }else {
+            return BaseResult.fail("获取数据失败，请先登录！");
+        }
+    }
+
+    @PutMapping("bindEmail")
+    @EnableSysLog("【前台】个人中心绑定邮箱")
+    public BaseResult bindEmail(@RequestParam("code")Integer code,
+                                  @RequestParam("email")String email,
+                                  HttpServletRequest request){
+
+        if(null==code||null==email){
+            return BaseResult.fail("验证码不存在或者邮箱不存在");
+        }
+        Integer contextCode = (Integer) request.getServletContext().getAttribute("code");
+        if(null==contextCode){
+            return BaseResult.fail("验证码已过期");
+        }
+        if(!contextCode.equals(code)){
+            return BaseResult.fail("验证码输入不正确，请重新输入！");
+        }
+
+        // 登录用户ID
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            eduStudentService.bindEmail(email,studentId);
+            return  BaseResult.success("绑定邮箱成功");
+        }else {
+            return BaseResult.fail("获取数据失败，请先登录！");
+        }
+
+    }
+
+    @EnableSysLog("【前台】个人中心发送手机验证码")
+    @PostMapping("sendSms/{phone}")
+    public BaseResult sendSms(@PathVariable String phone,HttpServletRequest request){
+        // 登录用户ID
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            eduStudentService.sendSms(phone,studentId);
+            return  BaseResult.success("发送手机验证码成功，请注意查询");
+        }else {
+            return BaseResult.fail("发送失败，请先登录！");
+        }
+
     }
 
 }

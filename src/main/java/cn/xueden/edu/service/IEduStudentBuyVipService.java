@@ -44,4 +44,6 @@ public interface IEduStudentBuyVipService {
      * @return
      */
     EduStudentBuyVip findByStudentId(Long studentId);
+
+
 }

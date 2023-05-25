@@ -46,6 +46,20 @@ public class ConstantPropertiesUtil implements InitializingBean {
 
     @Value("${aliyun.vod.file.templategroupid}")
     private String templategroupid;//转码组ID
+
+    // 短信站点
+    @Value("${aliyun.sms.regionid}")
+    private String smsRegionid;
+
+    // 短信签名
+    @Value("${aliyun.sms.signname}")
+    private String signName;
+
+    // 短信模板
+    @Value("${aliyun.sms.templatecode}")
+    private String templateCode;
+
+
     //定义常量，为了能够使用
     public static String ACCESS_KEY_ID;
     public static String ACCESS_KEY_SECRET;
@@ -56,6 +70,12 @@ public class ConstantPropertiesUtil implements InitializingBean {
     public static String HOST_COURSE;
     public static String HOST_PATH;
     public static String TEMPLATE_GROUPID;
+
+    public static String SMS_REGIONID;
+
+    public static String SIGN_NAME;
+
+    public static String TEMPLATE_CODE;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -68,6 +88,11 @@ public class ConstantPropertiesUtil implements InitializingBean {
         ACCESS_KEY_ID = keyid;
         ACCESS_KEY_SECRET = keysecret;
         TEMPLATE_GROUPID = templategroupid;
+
+        // 阿里云短信
+        SMS_REGIONID = smsRegionid;
+        SIGN_NAME = signName;
+        TEMPLATE_CODE = templateCode;
 
         LOGGER.info("----------完成初始化阿里云配置信息---------{}");
     }

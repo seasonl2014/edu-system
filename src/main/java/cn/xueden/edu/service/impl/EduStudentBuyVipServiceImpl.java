@@ -187,4 +187,6 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
     public EduStudentBuyVip findByStudentId(Long studentId) {
         return eduStudentBuyVipRepository.findByStudentId(studentId);
     }
+
+
 }
