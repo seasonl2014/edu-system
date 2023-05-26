@@ -54,7 +54,13 @@ public class EduCourseServiceImpl implements IEduCourseService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addCourse(EduCourse eduCourse) {
-
+        // 初始化数据
+        eduCourse.setBuyCount(0L);
+        eduCourse.setViewCount(0L);
+        eduCourse.setVipCount(0L);
+        eduCourse.setVersion(1L);
+        eduCourse.setStatus("Draft");
+       eduCourseRepository.save(eduCourse);
     }
 
     /**
@@ -140,5 +146,21 @@ public class EduCourseServiceImpl implements IEduCourseService {
         EduCourse  eduCourse = getById(courseId);
         eduCourse.setBuyCount(eduCourse.getBuyCount()==null?1:eduCourse.getBuyCount()+1);
         eduCourseRepository.save(eduCourse);
+    }
+
+    /**
+     * 保存课程封面
+     * @param courseId
+     * @param urlPath
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void uploadCover(Long courseId, String urlPath) {
+        // 根据课程ID获取课程信息
+       EduCourse dbEduCourse = eduCourseRepository.getReferenceById(courseId);
+       if(dbEduCourse!=null){
+           dbEduCourse.setCover(urlPath);
+           eduCourseRepository.save(dbEduCourse);
+       }
     }
 }

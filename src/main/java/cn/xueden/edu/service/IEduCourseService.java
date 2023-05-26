@@ -66,4 +66,11 @@ public interface IEduCourseService {
      * @param courseId
      */
     void updateBuyCount(Long courseId);
+
+    /**
+     * 保存课程封面
+     * @param courseId
+     * @param urlPath
+     */
+    void uploadCover(Long courseId, String urlPath);
 }

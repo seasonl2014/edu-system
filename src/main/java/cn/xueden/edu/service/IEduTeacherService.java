@@ -5,6 +5,8 @@ import cn.xueden.edu.service.dto.EduTeacherQueryCriteria;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**功能描述：教师模块业务接口
  * @author:梁志杰
  * @date:2023/2/24
@@ -52,4 +54,10 @@ public interface IEduTeacherService {
      * @return
      */
     long getCount();
+
+    /**
+     * 获取所有讲师
+     * @return
+     */
+    List<EduTeacher> getAll();
 }

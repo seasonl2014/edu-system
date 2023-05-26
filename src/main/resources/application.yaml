@@ -50,7 +50,7 @@ aliyun: #阿里云 vod
       bucketcoursename: xueden-cloud-edu-course
       host: career # 存放头像
       hostcourse: course # 存放课程封面图片等
-      hostpath: http://alioss.xueden.cn # 上传图片回显路径
+      hostpath: http://aligooss.xueden.cn # 上传图片回显路径
   sms:
     regionid: cn-hangzhou
     signname: 学灯网络技术服务部
@@ -80,7 +80,7 @@ server:
   port: 8081
 # 微信扫码登录配置
 wxcode:
-  appId: wx7aa745fb92387941
+  appId: wx7aa745fb92387941 # 微信开放平台 学灯网
   appSecret: c96a807ad4c892c4b6001af113c839ca
   redirectUri: http://dev01.sv1.k9s.run:2271/wechat/callback
   frontUrl: http://127.0.0.1:5173/

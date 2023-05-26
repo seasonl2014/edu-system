@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**功能描述：教师模块业务接口实现类
  * @author:梁志杰
  * @date:2023/2/24
@@ -95,5 +97,14 @@ public class EduTeacherServiceImpl implements IEduTeacherService {
     @Override
     public long getCount() {
         return eduTeacherRepository.count();
+    }
+
+    /**
+     * 获取所有讲师
+     * @return
+     */
+    @Override
+    public List<EduTeacher> getAll() {
+        return eduTeacherRepository.findAll();
     }
 }

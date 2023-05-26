@@ -3,6 +3,7 @@ package cn.xueden.edu.alivod.controller;
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.AliOssUploadImageLocalFileService;
+import cn.xueden.edu.service.IEduCourseService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,19 +22,22 @@ import java.util.Map;
 @RequestMapping("aliVod/upload")
 public class UploadImgController {
 
+    private final IEduCourseService eduCourseService;
+
     private final AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService;
 
-    public UploadImgController(AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService) {
+    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService) {
+        this.eduCourseService = eduCourseService;
         this.aliVodeUploadImageLocalFileService = aliVodeUploadImageLocalFileService;
     }
 
     @EnableSysLog("【后台】上传课程封面")
     @PostMapping("uploadCover")
     public BaseResult uploadCover(@RequestParam("fileResource") MultipartFile fileResource,
-                                  @RequestParam(value = "host",required = false) String host,
-                                  @RequestParam(value = "id",required = false) String id){
-        System.out.println("获取课程ID："+id);
-        Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadImageLocalFile(fileResource,host);
+                                  @RequestParam(value = "courseId",required = false) Long courseId){
+        System.out.println("获取课程ID："+courseId);
+        Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadImageLocalFile(fileResource,"course");
+        eduCourseService.uploadCover(courseId,map.get("urlPath").toString());
         return BaseResult.success(map);
     }
 }

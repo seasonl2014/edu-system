@@ -5,11 +5,14 @@ import cn.xueden.edu.service.IEduStudentService;
 import cn.xueden.edu.wxcode.WechatCodeConfig;
 import cn.xueden.edu.wxcode.utils.WeChatHttpUtils;
 
+import cn.xueden.utils.IpInfo;
 import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.Md5Util;
 
+import cn.xueden.utils.XuedenUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -20,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -83,8 +87,11 @@ public class WxApiController {
     //2、扫描人信息，添加数据
     @GetMapping("callback")
     //1、获取code值，临时票据、类似于验证码(该数据为扫码后跳转时微信方传来)
-    public String callback(String code,String state, Model model) {
-
+    public String callback(String code,String state, Model model,
+                           HttpServletRequest request) throws IOException {
+        // 获取用户IP地址
+        String ipAddress = XuedenUtil.getClientIp(request);
+        IpInfo ipInfo = XuedenUtil.getCityInfo(ipAddress);
 
         //2、拿着code请求微信固定的地址，得到两个值access_token 和 openid
         String baseAccessTokenUrl =
@@ -120,9 +127,18 @@ public class WxApiController {
             // 根据openid获取学员信息
             EduStudent dbEduStudent = eduStudentService.getByOpenid(openid);
             if(dbEduStudent!=null){
+                if(ipInfo!=null){
+                    dbEduStudent.setCity(ipInfo.getCity());
+                    dbEduStudent.setArea(ipInfo.getCountry());
+                    dbEduStudent.setProvince(ipInfo.getProvince());
+                    dbEduStudent.setIsp(ipInfo.getIsp());
+                }
+                // 更改登录次数
+                dbEduStudent.setLoginTimes(dbEduStudent.getLoginTimes()==null?1:dbEduStudent.getLoginTimes()+1);
+                eduStudentService.editStudent(dbEduStudent);
                 // 生成登录token
                 Map<String,String> map = new HashMap<>();
-                map.put("id",dbEduStudent.getId().toString());
+                map.put("studentId",dbEduStudent.getId().toString());
                 String studentToken = JWTUtil.getToken(map);
                 dbEduStudent.setStudentToken(studentToken);
                 model.addAttribute("dbEduStudent",dbEduStudent);
@@ -142,10 +158,13 @@ public class WxApiController {
             response = WeChatHttpUtils.getClient().execute(httpGet);
             JSONObject jsonUserinfo = JSON.parseObject(EntityUtils.toString(response.getEntity()));
             log.info("access_token{},openid{},unionid{},获取信息{}",access_token, openid,unionid,jsonUserinfo);
+            if(ipInfo!=null){
+                wxMember.setCity(ipInfo.getCity());
+                wxMember.setArea(ipInfo.getCountry());
+                wxMember.setProvince(ipInfo.getProvince());
+                wxMember.setIsp(ipInfo.getIsp());
+            }
 
-            wxMember.setCity(jsonUserinfo.getString("city"));
-            wxMember.setArea(jsonUserinfo.getString("country"));
-            wxMember.setProvince(jsonUserinfo.getString("province"));
             wxMember.setStudentIcon(jsonUserinfo.getString("headimgurl"));
             String nickname = new String(jsonUserinfo.getString("nickname").getBytes("ISO-8859-1"), "UTF-8");
             wxMember.setName(nickname);
@@ -164,7 +183,7 @@ public class WxApiController {
         }
         // 生成登录token
         Map<String,String> wxMap = new HashMap<>();
-        wxMap.put("id",wxMember.getId().toString());
+        wxMap.put("studentId",wxMember.getId().toString());
         String studentToken = JWTUtil.getToken(wxMap);
         wxMember.setStudentToken(studentToken);
         model.addAttribute("dbEduStudent",wxMember);

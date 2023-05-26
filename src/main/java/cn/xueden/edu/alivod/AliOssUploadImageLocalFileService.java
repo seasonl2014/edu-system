@@ -35,9 +35,10 @@ public class AliOssUploadImageLocalFileService {
         try {
             //1、获取到上传文件MultipartFile file 名称
             String filename = fileResource.getOriginalFilename();
+            String fileExtension = filename.substring(filename.lastIndexOf("."));
             //在文件名之前加上uuid，保证文件名称不重复（防止覆盖问题）
             String uuid = UUID.randomUUID().toString();
-            filename = uuid+filename;
+            filename = uuid+fileExtension;
             //构建日期路径：2020/02/03
             String filePath = new DateTime().toString("yyyy/MM/dd");
             String hostName = ConstantPropertiesUtil.HOST;

@@ -1,5 +1,6 @@
 package cn.xueden.edu.controller;
 
+import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduTeacher;
 import cn.xueden.edu.service.IEduTeacherService;
@@ -7,6 +8,7 @@ import cn.xueden.edu.service.dto.EduTeacherQueryCriteria;
 import cn.xueden.exception.BadRequestException;
 
 import cn.xueden.utils.PageVo;
+import cn.xueden.utils.ResultVo;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**功能描述：讲师模块前端控制器
  * @author:梁志杰
@@ -96,6 +101,20 @@ public class EduTeacherController {
         }
         teacherService.deleteById(id);
         return BaseResult.success("删除成功");
+    }
+
+    @EnableSysLog("【后台】获取所有讲师")
+    @GetMapping("all")
+    public BaseResult all(){
+        List<EduTeacher> list = teacherService.getAll();
+        List<ResultVo> resultVoList = list.stream().map(temp-> {
+            ResultVo obj = new ResultVo();
+            obj.setName(temp.getName());
+            obj.setId(temp.getId());
+            return obj;
+        }).collect(Collectors.toList());
+
+        return BaseResult.success(resultVoList);
     }
 
 }
