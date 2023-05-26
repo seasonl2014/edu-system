@@ -6,6 +6,7 @@ import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.domain.EduStudentBuyVip;
 import cn.xueden.edu.service.IEduStudentBuyVipService;
 import cn.xueden.edu.service.IEduStudentService;
+import cn.xueden.edu.vo.PassWordModel;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 
 import cn.xueden.system.domain.SysUser;
@@ -146,12 +147,54 @@ public class EduStudentCenterController {
             // 获取登录学员ID
             DecodedJWT decodedJWT = JWTUtil.verify(token);
             Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
-            eduStudentService.sendSms(phone,studentId);
+            Integer phoneCode =  eduStudentService.sendSms(phone,studentId);
+            request.getServletContext().setAttribute("phoneCode",phoneCode);
             return  BaseResult.success("发送手机验证码成功，请注意查询");
         }else {
             return BaseResult.fail("发送失败，请先登录！");
         }
 
+    }
+
+    @EnableSysLog("【前台】个人中心更换手机")
+    @PostMapping("updatePhone")
+    public BaseResult updatePhone(@RequestParam("phone") String phone,
+                                  @RequestParam("phoneCode") String phoneCode,
+                                  HttpServletRequest request){
+        // 登录用户ID
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            Integer contextPhoneCode = (Integer) request.getServletContext().getAttribute("phoneCode");
+            if(null==contextPhoneCode){
+                return BaseResult.fail("验证码已经过期");
+            }
+            if(!contextPhoneCode.equals(phoneCode)){
+                return BaseResult.fail("验证码输入不正确，请重新输入");
+            }
+            eduStudentService.updatePhone(phone,studentId);
+            return  BaseResult.success("发送手机验证码成功，请注意查询");
+        }else {
+            return BaseResult.fail("发送失败，请先登录！");
+        }
+
+    }
+
+    @EnableSysLog("【前台】个人中心更改密码")
+    @PutMapping("savePassWord")
+    public BaseResult savePassWord(@RequestBody PassWordModel passWordModel,
+                                   HttpServletRequest request){
+        // 登录用户ID
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")) {
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId = Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            eduStudentService.savePassWord(passWordModel,studentId);
+        }
+        return BaseResult.success("修改成功");
     }
 
 }

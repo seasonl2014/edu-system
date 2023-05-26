@@ -15,6 +15,7 @@ import cn.xueden.edu.service.IEduStudentService;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
+import cn.xueden.edu.vo.PassWordModel;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.sms.SendSmsService;
@@ -246,9 +247,42 @@ public class EduStudentServiceImpl implements IEduStudentService {
      * @param studentId
      */
     @Override
-    public void sendSms(String phone, Long studentId) {
+    public Integer sendSms(String phone, Long studentId) {
         // 随机生成6位数数
         Integer code = XuedenUtil.randomSixNums();
         SendSmsService.SendCodeByPhone(code.toString(),phone);
+        return code;
+    }
+
+    /**
+     * 更换手机
+     * @param phone
+     * @param studentId
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePhone(String phone, Long studentId) {
+        EduStudent eduStudent = studentRepository.getReferenceById(studentId);
+        eduStudent.setPhone(phone);
+        studentRepository.save(eduStudent);
+    }
+
+    /**
+     * 个人中心更改密码
+     * @param passWordModel
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void savePassWord(PassWordModel passWordModel, Long studentId) {
+        EduStudent dbEduStudent = studentRepository.getReferenceById(studentId);
+        if(passWordModel==null){
+            throw new BadRequestException("更改失败，请填写完整信息！");
+        }else if(!passWordModel.getNewPassWord().equalsIgnoreCase(passWordModel.getResNewPassWord())){
+            throw new BadRequestException("更改失败,两次输入密码不一致！");
+        }else if(!Md5Util.Md5(passWordModel.getPassWord()).equalsIgnoreCase(dbEduStudent.getPassword())){
+            throw new BadRequestException("更改失败,原密码不正确！");
+        }
+        dbEduStudent.setPassword(Md5Util.Md5(passWordModel.getResNewPassWord()));
+        studentRepository.save(dbEduStudent);
     }
 }

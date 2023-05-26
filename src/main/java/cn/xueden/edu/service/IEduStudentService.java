@@ -5,6 +5,7 @@ import cn.xueden.edu.domain.EduStudent;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
+import cn.xueden.edu.vo.PassWordModel;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import org.springframework.data.domain.Pageable;
 
@@ -97,5 +98,18 @@ public interface IEduStudentService {
      * @param phone
      * @param studentId
      */
-    void sendSms(String phone, Long studentId);
+    Integer sendSms(String phone, Long studentId);
+
+    /**
+     * 更换手机
+     * @param phone
+     * @param studentId
+     */
+    void updatePhone(String phone, Long studentId);
+
+    /**
+     * 个人中心更改密码
+     * @param passWordModel
+     */
+    void savePassWord(PassWordModel passWordModel, Long studentId);
 }
