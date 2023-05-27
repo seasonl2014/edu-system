@@ -40,4 +40,11 @@ public class UploadImgController {
         eduCourseService.uploadCover(courseId,map.get("urlPath").toString());
         return BaseResult.success(map);
     }
+
+    @EnableSysLog("【后台】编辑器上传图片")
+    @PostMapping("uploadEditor")
+    public BaseResult uploadEditor(@RequestParam("fileResource") MultipartFile fileResource){
+        Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadImageLocalFile(fileResource,"course");
+        return BaseResult.success(map);
+    }
 }

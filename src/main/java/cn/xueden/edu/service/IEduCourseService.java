@@ -80,4 +80,5 @@ public interface IEduCourseService {
      * @param status
      */
     void updateStatus(Long courseId, String status);
+
 }
