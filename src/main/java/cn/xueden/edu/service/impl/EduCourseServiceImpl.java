@@ -1,14 +1,19 @@
 package cn.xueden.edu.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.xueden.edu.domain.EduCourse;
-import cn.xueden.edu.domain.EduStudent;
+
 import cn.xueden.edu.repository.EduCourseRepository;
+import cn.xueden.edu.repository.EduCourseVideoRepository;
 import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
+import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
-import lombok.val;
-import org.springframework.beans.BeanUtils;
+
+
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,8 +35,11 @@ public class EduCourseServiceImpl implements IEduCourseService {
 
     private final EduCourseRepository eduCourseRepository;
 
-    public EduCourseServiceImpl(EduCourseRepository eduCourseRepository) {
+    private final EduCourseVideoRepository eduCourseVideoRepository;
+
+    public EduCourseServiceImpl(EduCourseRepository eduCourseRepository, EduCourseVideoRepository eduCourseVideoRepository) {
         this.eduCourseRepository = eduCourseRepository;
+        this.eduCourseVideoRepository = eduCourseVideoRepository;
     }
 
     /**
@@ -82,7 +90,7 @@ public class EduCourseServiceImpl implements IEduCourseService {
     public void editCourse(EduCourse eduCourse) {
         // 根据课程ID获取课程信息
         EduCourse dbEduCourse = getById(eduCourse.getId());
-        BeanUtils.copyProperties(eduCourse,dbEduCourse);
+        BeanUtil.copyProperties(eduCourse,dbEduCourse, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
         eduCourseRepository.save(dbEduCourse);
     }
 
@@ -162,5 +170,28 @@ public class EduCourseServiceImpl implements IEduCourseService {
            dbEduCourse.setCover(urlPath);
            eduCourseRepository.save(dbEduCourse);
        }
+    }
+
+    /**
+     * 更新课程状态
+     * @param courseId
+     * @param status
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateStatus(Long courseId, String status) {
+        // 根据课程ID获取课程信息
+        EduCourse dbEduCourse = eduCourseRepository.getReferenceById(courseId);
+        if(dbEduCourse!=null){
+            dbEduCourse.setStatus(status);
+            // 如果是发布课程，则需要统计课时
+            if(status.equals("Normal")){
+                Integer count = eduCourseVideoRepository.countByCourseId(dbEduCourse.getId());
+                dbEduCourse.setLessonNum(count);
+            }
+            eduCourseRepository.save(dbEduCourse);
+        }else {
+            throw new BadRequestException("更新课程状态失败！");
+        }
     }
 }

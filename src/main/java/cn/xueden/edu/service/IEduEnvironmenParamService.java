@@ -1,5 +1,9 @@
 package cn.xueden.edu.service;
 
+import cn.xueden.edu.domain.EduEnvironmenParam;
+
+import java.util.List;
+
 /**功能描述：开发环境参数业务接口
  * @author:梁志杰
  * @date:2023/5/15
@@ -13,4 +17,11 @@ public interface IEduEnvironmenParamService {
      * @return
      */
     Object getEduEnvironmenParamListByCourseId(Long courseId);
+
+
+    /**
+     * 保存或更新课程环境
+     * @param eduEnvironmenParamList
+     */
+    void saveOrUpdateEnvironmen(List<EduEnvironmenParam> eduEnvironmenParamList);
 }

@@ -16,4 +16,11 @@ public interface EduCourseVideoRepository extends JpaRepository<EduCourseVideo, 
      * @return
      */
     List<EduCourseVideo> findByChapterIdOrderBySortAsc(Long id);
+
+    /**
+     * 根据课程ID统计课时
+     * @param courseId
+     * @return
+     */
+    Integer countByCourseId(Long courseId);
 }

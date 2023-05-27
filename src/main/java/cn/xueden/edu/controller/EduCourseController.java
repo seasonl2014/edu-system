@@ -4,7 +4,9 @@ import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduCourse;
 
+import cn.xueden.edu.domain.EduEnvironmenParam;
 import cn.xueden.edu.service.IEduCourseService;
+import cn.xueden.edu.service.IEduEnvironmenParamService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
 
 import cn.xueden.exception.BadRequestException;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**功能描述：课程前端控制器
  * @author:梁志杰
@@ -28,10 +32,12 @@ public class EduCourseController {
     
     private final IEduCourseService eduCourseService;
 
-    public EduCourseController(IEduCourseService eduCourseService) {
-        this.eduCourseService = eduCourseService;
-    }
+    private final IEduEnvironmenParamService eduEnvironmenParamService;
 
+    public EduCourseController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService) {
+        this.eduCourseService = eduCourseService;
+        this.eduEnvironmenParamService = eduEnvironmenParamService;
+    }
 
     @EnableSysLog("【后台】获取课程列表数据")
     @GetMapping
@@ -76,5 +82,27 @@ public class EduCourseController {
         }
         eduCourseService.deleteById(id);
         return BaseResult.success("删除成功");
+    }
+
+    @EnableSysLog("【后台】更新课程状态")
+    @PutMapping("updateStatus")
+    public BaseResult updateStatus(@RequestParam("courseId") Long courseId,
+                                   @RequestParam("status") String status){
+        eduCourseService.updateStatus(courseId,status);
+        return BaseResult.success("更新课程状态成功");
+
+    }
+
+    @EnableSysLog("【后台】保存或更新课程环境")
+    @PostMapping("saveOrUpdateEnvironmen")
+    public BaseResult saveOrUpdateEnvironmen(@RequestBody List<EduEnvironmenParam> eduEnvironmenParamList){
+        eduEnvironmenParamService.saveOrUpdateEnvironmen(eduEnvironmenParamList);
+        return BaseResult.success("保存课程环境成功");
+    }
+
+    @EnableSysLog("【后台】根据课程ID获取环境参数列表数据")
+    @GetMapping("getEnvironmenList/{courseId}")
+    public BaseResult getEnvironmenList(@PathVariable Long courseId){
+       return BaseResult.success(eduEnvironmenParamService.getEduEnvironmenParamListByCourseId(courseId)) ;
     }
 }

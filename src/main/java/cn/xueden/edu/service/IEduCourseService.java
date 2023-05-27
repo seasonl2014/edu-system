@@ -73,4 +73,11 @@ public interface IEduCourseService {
      * @param urlPath
      */
     void uploadCover(Long courseId, String urlPath);
+
+    /**
+     * 更新课程状态
+     * @param courseId
+     * @param status
+     */
+    void updateStatus(Long courseId, String status);
 }
