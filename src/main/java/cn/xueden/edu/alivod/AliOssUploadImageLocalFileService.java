@@ -2,9 +2,12 @@ package cn.xueden.edu.alivod;
 
 import cn.hutool.core.date.DateTime;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+import cn.xueden.edu.domain.EduCourse;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
+import com.aliyun.vod.upload.impl.PutObjectProgressListener;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,4 +71,59 @@ public class AliOssUploadImageLocalFileService {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * 功能描述：阿里云上传课程资料
+     * @param file
+     * @return
+     */
+    public Map<String,Object> uploadCourseResource(MultipartFile file,Long courseId){
+        String endpoint = ConstantPropertiesUtil.END_POINT;
+        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
+        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
+        String yourBucketName = ConstantPropertiesUtil.BUCKET_COURSE_NAME;
+        //String hostpath = ConstantPropertiesUtil.HOST_PATH;
+        try {
+            //1、获取到上传文件MultipartFile file
+            String filename = file.getOriginalFilename();
+            // 2、获取文件后缀名
+            String substring = filename.substring(filename.lastIndexOf(".")).toLowerCase();
+
+
+            //在文件名之前加上uuid，保证文件名称不重复（防止覆盖问题）
+            String uuid = UUID.randomUUID().toString();
+            //构建日期名称：2020-02-03
+            String fileDate = new DateTime().toString("yyyy-MM-dd");
+            filename = uuid+"-"+fileDate+"-"+courseId+substring;
+
+            String hostName = ConstantPropertiesUtil.HOST_COURSE;
+
+            filename = hostName+"/"+filename;
+
+            InputStream inputStream = file.getInputStream();
+
+            //3、把上传文件存储到阿里云oss里面
+            // 创建OSSClient实例。
+            OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+
+            // 上传文件流。
+            //ossClient.putObject(yourBucketName, filename, inputStream);
+            // 带进度条的上传
+            ossClient.putObject(new PutObjectRequest(yourBucketName, filename, inputStream).
+                    <PutObjectRequest>withProgressListener(new PutObjectProgressListener()));
+
+            // 关闭OSSClient。
+            ossClient.shutdown();
+
+            String path = filename;
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put("urlPath",path);
+            return map;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

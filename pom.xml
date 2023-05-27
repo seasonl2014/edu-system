@@ -143,6 +143,14 @@
             <version>4.4.0</version>
         </dependency>
 
+        <!-- 下载资料用到 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

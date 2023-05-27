@@ -47,7 +47,7 @@ aliyun: #阿里云 vod
     file:
       endpoint: oss-cn-shanghai.aliyuncs.com
       bucketname: goxuetang
-      bucketcoursename: xueden-cloud-edu-course
+      bucketcoursename: xueden-go-edu-course
       host: career # 存放头像
       hostcourse: course # 存放课程封面图片等
       hostpath: http://aligooss.xueden.cn # 上传图片回显路径

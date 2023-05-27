@@ -24,4 +24,17 @@ public interface IEduCourseDataService {
      * @return
      */
     EduCourseData getById(Long courseDataId);
+
+    /**
+     * 保存或更新课程配套资料
+     * @param eduCourseDataList
+     */
+    void saveOrUpdateCourseData(List<EduCourseData> eduCourseDataList);
+
+    /**
+     * 根据下载路径获取数据
+     * @param fileName
+     * @return
+     */
+    EduCourseData getByDownloadAddress(String fileName);
 }

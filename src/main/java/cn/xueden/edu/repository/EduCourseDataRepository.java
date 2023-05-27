@@ -16,4 +16,11 @@ public interface EduCourseDataRepository extends JpaRepository<EduCourseData, Lo
      * @return
      */
     List<EduCourseData> getCourseDataByCourseId(Long courseId);
+
+    /**
+     * 根据下载路径获取数据
+     * @param fileName
+     * @return
+     */
+    EduCourseData findByDownloadAddress(String fileName);
 }

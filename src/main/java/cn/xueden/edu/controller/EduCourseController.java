@@ -4,7 +4,9 @@ import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduCourse;
 
+import cn.xueden.edu.domain.EduCourseData;
 import cn.xueden.edu.domain.EduEnvironmenParam;
+import cn.xueden.edu.service.IEduCourseDataService;
 import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.IEduEnvironmenParamService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
@@ -34,9 +36,12 @@ public class EduCourseController {
 
     private final IEduEnvironmenParamService eduEnvironmenParamService;
 
-    public EduCourseController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService) {
+    private final IEduCourseDataService eduCourseDataService;
+
+    public EduCourseController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseDataService eduCourseDataService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
+        this.eduCourseDataService = eduCourseDataService;
     }
 
     @EnableSysLog("【后台】获取课程列表数据")
@@ -105,4 +110,20 @@ public class EduCourseController {
     public BaseResult getEnvironmenList(@PathVariable Long courseId){
        return BaseResult.success(eduEnvironmenParamService.getEduEnvironmenParamListByCourseId(courseId)) ;
     }
+
+    @EnableSysLog("【后台】根据课程ID获取课程资料数列表数据")
+    @GetMapping("getCourseDataList/{courseId}")
+    public BaseResult getCourseDataList(@PathVariable Long courseId){
+        return BaseResult.success(eduCourseDataService.getCourseDataByCourseId(courseId)) ;
+    }
+
+    @EnableSysLog("【后台】保存或更新课程配套资料")
+    @PostMapping("saveOrUpdateCourseData")
+    public BaseResult saveOrUpdateCourseData(@RequestBody List<EduCourseData> eduCourseDataList){
+        eduCourseDataService.saveOrUpdateCourseData(eduCourseDataList);
+        return BaseResult.success("保存课程资料成功");
+    }
+
+
+
 }

@@ -43,4 +43,26 @@ public class EduCourseDataServiceImpl implements IEduCourseDataService {
     public EduCourseData getById(Long courseDataId) {
         return eduCourseDataRepository.findById(courseDataId).orElseGet(EduCourseData::new);
     }
+
+    /**
+     * 保存或更新课程配套资料
+     * @param eduCourseDataList
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateCourseData(List<EduCourseData> eduCourseDataList) {
+        if(eduCourseDataList!=null&&eduCourseDataList.size()>0){
+            eduCourseDataRepository.saveAll(eduCourseDataList);
+        }
+    }
+
+    /**
+     * 根据文件路径获取数据
+     * @param fileName
+     * @return
+     */
+    @Override
+    public EduCourseData getByDownloadAddress(String fileName) {
+        return eduCourseDataRepository.findByDownloadAddress(fileName);
+    }
 }
