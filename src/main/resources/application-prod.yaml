@@ -2,6 +2,10 @@ server:
   port: 8888
 # ?????
 spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root

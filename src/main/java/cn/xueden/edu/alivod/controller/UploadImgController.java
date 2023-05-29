@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**功能描述：上传图片到阿里视频点播平台自带的OSS
@@ -74,14 +75,38 @@ public class UploadImgController {
     @EnableSysLog("【后台】上传课程配套资料")
     @PostMapping("uploadFile")
     public BaseResult uploadFile(@RequestParam("fileResource") MultipartFile fileResource,
-                                 @RequestParam(value = "courseDataId",required = false) Long courseDataId){
-        if(courseDataId==null){
+                                 @RequestParam(value = "courseDataId",required = false) Long courseDataId,
+                                 @RequestParam(value = "fileKey",required = true) String fileKey,
+                                 HttpServletRequest request){
+        if(courseDataId==null||fileKey==null){
             return BaseResult.fail("上传失败");
         }else {
-            Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadCourseResource(fileResource,courseDataId);
+            Map<String,Object> map = new HashMap<>();
+            // 根据fileKey查询数据
+            EduCourseData dbEduCourseData = eduCourseDataService.findByFileKey(fileKey);
+            if(dbEduCourseData!=null){
+                map.put("courseDataId",courseDataId);
+                map.put("urlPath",dbEduCourseData.getDownloadAddress());
+                return BaseResult.success("极速秒传成功",map);
+            }
+            map = aliVodeUploadImageLocalFileService.uploadCourseResource(fileResource,courseDataId,request,fileKey);
             map.put("courseDataId",courseDataId);
             return BaseResult.success(map);
         }
+    }
+
+    /**
+     * 获取实时长传进度
+     * @param fileKey
+     * @return
+     */
+    @GetMapping("getUploadPercent/{fileKey}")
+    public BaseResult getUploadPercent(@PathVariable String fileKey,HttpServletRequest request){
+        System.out.println("从request获取===="+fileKey+"=====getUploadPercent方法====："+request.getServletContext().getAttribute("upload_percent"+fileKey));
+        int percent = request.getServletContext().getAttribute("upload_percent"+fileKey) == null ? -1: (int) request.getServletContext().getAttribute("upload_percent"+fileKey);
+        Map<String,Object> map = new HashMap<>();
+        map.put("percent",percent);
+        return BaseResult.success(map);
     }
 
     /**

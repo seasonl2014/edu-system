@@ -37,4 +37,11 @@ public interface IEduCourseDataService {
      * @return
      */
     EduCourseData getByDownloadAddress(String fileName);
+
+    /**
+     * 根据fileKey查询数据
+     * @param fileKey
+     * @return
+     */
+    EduCourseData findByFileKey(String fileKey);
 }

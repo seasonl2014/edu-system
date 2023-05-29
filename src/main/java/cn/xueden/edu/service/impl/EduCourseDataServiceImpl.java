@@ -65,4 +65,14 @@ public class EduCourseDataServiceImpl implements IEduCourseDataService {
     public EduCourseData getByDownloadAddress(String fileName) {
         return eduCourseDataRepository.findByDownloadAddress(fileName);
     }
+
+    /**
+     * 根据fileKey查询数据
+     * @param fileKey
+     * @return
+     */
+    @Override
+    public EduCourseData findByFileKey(String fileKey) {
+        return eduCourseDataRepository.findFirstByFileKey(fileKey);
+    }
 }

@@ -7,7 +7,8 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
-import com.aliyun.vod.upload.impl.PutObjectProgressListener;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,12 +78,11 @@ public class AliOssUploadImageLocalFileService {
      * @param file
      * @return
      */
-    public Map<String,Object> uploadCourseResource(MultipartFile file,Long courseId){
+    public Map<String,Object> uploadCourseResource(MultipartFile file, Long courseId, HttpServletRequest request,String fileKey){
         String endpoint = ConstantPropertiesUtil.END_POINT;
         String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
         String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
         String yourBucketName = ConstantPropertiesUtil.BUCKET_COURSE_NAME;
-        //String hostpath = ConstantPropertiesUtil.HOST_PATH;
         try {
             //1、获取到上传文件MultipartFile file
             String filename = file.getOriginalFilename();
@@ -110,7 +110,7 @@ public class AliOssUploadImageLocalFileService {
             //ossClient.putObject(yourBucketName, filename, inputStream);
             // 带进度条的上传
             ossClient.putObject(new PutObjectRequest(yourBucketName, filename, inputStream).
-                    <PutObjectRequest>withProgressListener(new PutObjectProgressListener()));
+                    <PutObjectRequest>withProgressListener(new PutObjectProgressListener(request,fileKey,inputStream.available())));
 
             // 关闭OSSClient。
             ossClient.shutdown();
