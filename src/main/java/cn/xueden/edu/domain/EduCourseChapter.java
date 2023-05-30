@@ -1,6 +1,7 @@
 package cn.xueden.edu.domain;
 
 import cn.xueden.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "edu_course_chapter")
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
 @org.hibernate.annotations.Table(appliesTo = "edu_course_chapter",comment = "课程大章信息表")
 public class EduCourseChapter extends BaseEntity {
     @Id

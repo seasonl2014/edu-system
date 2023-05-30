@@ -16,4 +16,30 @@ public interface IEduCourseVideoService {
      * @return
      */
     EduCourseVideo findById(Long id);
+
+    /**
+     * 根据文件KEY查找记录
+     * @param fileKey
+     * @return
+     */
+    EduCourseVideo findByFileKey(String fileKey);
+
+    /**
+     * 更新课程大纲小节
+     * @param eduVideoVO
+     */
+    void save(EduCourseVideo eduVideoVO);
+
+    /**
+     * 删除课程大纲小节
+     * @param id
+     */
+    void removeById(Long id);
+
+    /**
+     * 更新视频源ID和时长
+     * @param id
+     * @param dbEduCourseVideo
+     */
+    void updateByCourseVideo(Long id, EduCourseVideo dbEduCourseVideo);
 }

@@ -81,4 +81,11 @@ public interface IEduCourseService {
      */
     void updateStatus(Long courseId, String status);
 
+    /**
+     * 获取树形课程大纲
+     * @param courseId
+     * @param pageable
+     * @return
+     */
+    Object chapterTree(Long courseId, Pageable pageable);
 }

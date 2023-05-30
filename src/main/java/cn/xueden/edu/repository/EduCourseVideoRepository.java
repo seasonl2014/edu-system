@@ -23,4 +23,11 @@ public interface EduCourseVideoRepository extends JpaRepository<EduCourseVideo, 
      * @return
      */
     Integer countByCourseId(Long courseId);
+
+    /**
+     * 根据文件KEY查找记录
+     * @param fileKey
+     * @return
+     */
+    EduCourseVideo findByFileKey(String fileKey);
 }

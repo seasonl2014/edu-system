@@ -1,5 +1,7 @@
 package cn.xueden.edu.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.xueden.edu.converter.EduCourseChapterConverter;
 import cn.xueden.edu.domain.EduCourseChapter;
 import cn.xueden.edu.domain.EduCourseVideo;
@@ -47,5 +49,43 @@ public class EduCourseChapterServiceImpl implements IEduCourseChapterService {
             chapterVO.setChildren(eduVideoList);
         }
         return eduChapterVOList;
+    }
+
+    /**
+     * 保存课程大纲
+     * @param eduCourseChapter
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void addEduChapter(EduCourseChapter eduCourseChapter) {
+        // 更新课程大纲中的大章
+        if(eduCourseChapter.getId()!=null){
+            EduCourseChapter dbEduCourseChapter = eduCourseChapterRepository.getReferenceById(eduCourseChapter.getId());
+            BeanUtil.copyProperties(eduCourseChapter,dbEduCourseChapter, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
+            eduCourseChapterRepository.save(dbEduCourseChapter);
+        }else {
+            eduCourseChapterRepository.save(eduCourseChapter);
+        }
+
+    }
+
+    /**
+     * 根据ID获取大章信息
+     * @param id
+     * @return
+     */
+    @Override
+    public EduCourseChapter getById(Long id) {
+        return eduCourseChapterRepository.getReferenceById(id);
+    }
+
+    /**
+     * 删除课程大章
+     * @param id
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void removeById(Long id) {
+        eduCourseChapterRepository.deleteById(id);
     }
 }

@@ -1,7 +1,10 @@
 package cn.xueden.edu.converter;
 
 import cn.xueden.edu.domain.EduCourseChapter;
+import cn.xueden.edu.domain.EduCourseVideo;
+import cn.xueden.edu.repository.EduCourseVideoRepository;
 import cn.xueden.edu.vo.EduChapterModel;
+import cn.xueden.edu.vo.EduChapterTreeNodeModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -32,4 +35,30 @@ public class EduCourseChapterConverter {
         }
         return eduChapterVOS;
     }
+
+    /**
+     * 转树节点
+     * @param eduChapterVOList
+     * @return
+     */
+    public static List<EduChapterModel> converterToTreeNodeVO(List<EduChapterModel> eduChapterVOList,
+                                                                      EduCourseVideoRepository eduVideoMapper) {
+        List<EduChapterModel> nodes=new ArrayList<>();
+        if(!CollectionUtils.isEmpty(eduChapterVOList)){
+            for (EduChapterModel eduChapterVO : eduChapterVOList) {
+                List<EduCourseVideo> eduVideoList = eduVideoMapper.findByChapterIdOrderBySortAsc(eduChapterVO.getId());
+
+                // 统计章节总时长
+                float totalChapterDuration=0f;
+                for (EduCourseVideo video:eduVideoList){
+                    totalChapterDuration+=video.getDuration();
+                }
+                eduChapterVO.setDuration(totalChapterDuration);
+                eduChapterVO.setChildren(eduVideoList);
+                nodes.add(eduChapterVO);
+            }
+        }
+        return nodes;
+    }
+
 }

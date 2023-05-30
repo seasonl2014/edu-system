@@ -2,12 +2,18 @@ package cn.xueden.edu.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.xueden.edu.converter.EduCourseChapterConverter;
 import cn.xueden.edu.domain.EduCourse;
 
+import cn.xueden.edu.domain.EduCourseChapter;
+import cn.xueden.edu.repository.EduCourseChapterRepository;
 import cn.xueden.edu.repository.EduCourseRepository;
 import cn.xueden.edu.repository.EduCourseVideoRepository;
 import cn.xueden.edu.service.IEduCourseService;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
+import cn.xueden.edu.utils.EduChapterTreeBuilder;
+import cn.xueden.edu.vo.EduChapterModel;
+import cn.xueden.edu.vo.EduChapterTreeNodeModel;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
@@ -37,9 +43,12 @@ public class EduCourseServiceImpl implements IEduCourseService {
 
     private final EduCourseVideoRepository eduCourseVideoRepository;
 
-    public EduCourseServiceImpl(EduCourseRepository eduCourseRepository, EduCourseVideoRepository eduCourseVideoRepository) {
+    private final EduCourseChapterRepository eduCourseChapterRepository;
+
+    public EduCourseServiceImpl(EduCourseRepository eduCourseRepository, EduCourseVideoRepository eduCourseVideoRepository, EduCourseChapterRepository eduCourseChapterRepository) {
         this.eduCourseRepository = eduCourseRepository;
         this.eduCourseVideoRepository = eduCourseVideoRepository;
+        this.eduCourseChapterRepository = eduCourseChapterRepository;
     }
 
     /**
@@ -193,5 +202,30 @@ public class EduCourseServiceImpl implements IEduCourseService {
         }else {
             throw new BadRequestException("更新课程状态失败！");
         }
+    }
+
+    /**
+     * 获取树形课程大纲
+     * @param courseId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object chapterTree(Long courseId, Pageable pageable) {
+        // 获取课程大章
+        List<EduChapterModel> eduChapterVOS = findAllByEduChapter(courseId);
+        List<EduChapterModel> nodeVOS=EduCourseChapterConverter.converterToTreeNodeVO(eduChapterVOS,eduCourseVideoRepository);
+        List<EduChapterModel> tree = EduChapterTreeBuilder.build(nodeVOS);
+        return tree;
+    }
+
+    /**
+     * 根据课程ID获取所有章节
+     * @param courseId
+     * @return
+     */
+    public List<EduChapterModel> findAllByEduChapter(Long courseId){
+        List<EduCourseChapter> eduCourseChapters = eduCourseChapterRepository.findListByCourseId(courseId);
+        return EduCourseChapterConverter.converterToVOList(eduCourseChapters);
     }
 }

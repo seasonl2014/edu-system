@@ -2,13 +2,9 @@ package cn.xueden.edu.controller;
 
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
-import cn.xueden.edu.domain.EduCourse;
+import cn.xueden.edu.domain.*;
 
-import cn.xueden.edu.domain.EduCourseData;
-import cn.xueden.edu.domain.EduEnvironmenParam;
-import cn.xueden.edu.service.IEduCourseDataService;
-import cn.xueden.edu.service.IEduCourseService;
-import cn.xueden.edu.service.IEduEnvironmenParamService;
+import cn.xueden.edu.service.*;
 import cn.xueden.edu.service.dto.EduCourseQueryCriteria;
 
 import cn.xueden.exception.BadRequestException;
@@ -38,10 +34,16 @@ public class EduCourseController {
 
     private final IEduCourseDataService eduCourseDataService;
 
-    public EduCourseController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseDataService eduCourseDataService) {
+    private final IEduCourseChapterService eduCourseChapterService;
+
+    private final IEduCourseVideoService eduCourseVideoService;
+
+    public EduCourseController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseDataService eduCourseDataService, IEduCourseChapterService eduCourseChapterService, IEduCourseVideoService eduCourseVideoService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseDataService = eduCourseDataService;
+        this.eduCourseChapterService = eduCourseChapterService;
+        this.eduCourseVideoService = eduCourseVideoService;
     }
 
     @EnableSysLog("【后台】获取课程列表数据")
@@ -125,5 +127,63 @@ public class EduCourseController {
     }
 
 
+    @EnableSysLog("【后台】获取树形课程大纲")
+    @GetMapping("chapterTree")
+    public BaseResult chapterTree(PageVo pageVo,@RequestParam("courseId") Long courseId){
+        if(courseId==null){
+            return BaseResult.fail("获取课程大纲失败!");
+        }
+        Pageable pageable = PageRequest.of(pageVo.getPageIndex()-1, pageVo.getPageSize(),
+                Sort.Direction.DESC,"sort");
+        return BaseResult.success(eduCourseService.chapterTree(courseId,pageable));
+
+    }
+
+    @EnableSysLog("【后台】保存课程大纲")
+    @PostMapping("addEduChapter")
+    public BaseResult addEduChapter(EduCourseChapter eduCourseChapter){
+        eduCourseChapterService.addEduChapter(eduCourseChapter);
+        return BaseResult.success("保存成功");
+    }
+
+    @EnableSysLog("【后台】根据ID获取大章信息")
+    @GetMapping("/chapter/{id}")
+    public BaseResult getChapterById(@PathVariable Long id) {
+        EduCourseChapter eduChapterVO = eduCourseChapterService.getById(id);
+        return BaseResult.success(eduChapterVO);
+    }
+
+    @EnableSysLog("【后台】更新课程大纲小节")
+    @PutMapping("updateVideo")
+    public BaseResult updateVideo(@RequestBody EduCourseVideo eduVideoVO){
+        eduCourseVideoService.save(eduVideoVO);
+        return BaseResult.success("更新成功");
+    }
+
+    @EnableSysLog("【后台】删除课程大纲小节")
+    @DeleteMapping("delEduVideo/{id}")
+    public BaseResult delEduVideo(@PathVariable Long id){
+        eduCourseVideoService.removeById(id);
+        return BaseResult.success("删除成功！");
+    }
+
+    @EnableSysLog("【后台】删除课程大章")
+    @DeleteMapping("delEduChapter/{id}")
+    public BaseResult delEduChapter(@PathVariable Long id){
+        eduCourseChapterService.removeById(id);
+        return BaseResult.success("删除成功");
+    }
+
+    @EnableSysLog("【后台】根据课程小节ID获取信息")
+    @GetMapping("video/{id}")
+    public BaseResult video(@PathVariable Long id){
+        if(null==id){
+            return BaseResult.fail("获取数据失败！");
+        }else{
+            EduCourseVideo dbEduCourseVideo = eduCourseVideoService.findById(id);
+            return BaseResult.success(dbEduCourseVideo);
+        }
+
+    }
 
 }
