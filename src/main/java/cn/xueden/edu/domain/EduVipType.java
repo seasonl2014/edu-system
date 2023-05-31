@@ -1,6 +1,7 @@
 package cn.xueden.edu.domain;
 
 import cn.xueden.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "edu_vip_type")
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
 @org.hibernate.annotations.Table(appliesTo = "edu_vip_type",comment = "vip类型信息表")
 public class EduVipType extends BaseEntity {
 

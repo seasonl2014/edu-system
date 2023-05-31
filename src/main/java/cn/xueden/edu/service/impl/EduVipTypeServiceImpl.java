@@ -1,6 +1,8 @@
 package cn.xueden.edu.service.impl;
 
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.xueden.edu.domain.EduVipType;
 import cn.xueden.edu.repository.EduVipTypeRepository;
 import cn.xueden.edu.service.IEduVipTypeService;
@@ -57,5 +59,27 @@ public class EduVipTypeServiceImpl implements IEduVipTypeService {
     @Override
     public List<EduVipType> findAll() {
         return eduVipTypeRepository.findAll();
+    }
+
+    /**
+     * 根据ID获取VIP类别数据
+     * @param id
+     * @return
+     */
+    @Override
+    public EduVipType findById(Long id) {
+        return eduVipTypeRepository.getReferenceById(id);
+    }
+
+    /**
+     * 更新类别数据
+     * @param eduVipType
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void editEduVipType(EduVipType eduVipType) {
+        EduVipType dbEduVipType = eduVipTypeRepository.getReferenceById(eduVipType.getId());
+        BeanUtil.copyProperties(eduVipType,dbEduVipType, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
+        eduVipTypeRepository.save(dbEduVipType);
     }
 }

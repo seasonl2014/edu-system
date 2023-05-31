@@ -163,7 +163,7 @@ public class UserController {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = (String) request.getServletContext().getAttribute("token");
         DecodedJWT decodedJWT = JWTUtil.verify(token);
-        Long userId= decodedJWT.getClaim("id").asLong();
+        Long userId= Long.parseLong(decodedJWT.getClaim("id").asString());
         sysUser.setId(userId);
         sysUserService.editUser(sysUser);
         return BaseResult.success("更新成功");
@@ -183,7 +183,7 @@ public class UserController {
             // 获取登录用户ID
             String token = (String) request.getServletContext().getAttribute("token");
             DecodedJWT decodedJWT = JWTUtil.verify(token);
-            Long userId= decodedJWT.getClaim("id").asLong();
+            Long userId= Long.parseLong(decodedJWT.getClaim("id").asString());
             SysUser dbSysUser = sysUserService.getById(userId);
             email = dbSysUser.getEmail();
         }
@@ -247,7 +247,7 @@ public class UserController {
         // 登录用户ID
         String token = (String) request.getServletContext().getAttribute("token");
         DecodedJWT decodedJWT = JWTUtil.verify(token);
-        Long userId= decodedJWT.getClaim("id").asLong();
+        Long userId= Long.parseLong(decodedJWT.getClaim("id").asString());
         SysUser sysUser = new SysUser();
         sysUser.setId(userId);
         sysUser.setEmail(email);
@@ -271,7 +271,7 @@ public class UserController {
         }
         String token = (String) request.getServletContext().getAttribute("token");
         DecodedJWT decodedJWT = JWTUtil.verify(token);
-        Long userId= decodedJWT.getClaim("id").asLong();
+        Long userId= Long.parseLong(decodedJWT.getClaim("id").asString());
         modifyPwdModel.setUserId(userId);
         boolean result = sysUserService.updatePwd(modifyPwdModel);
         if(result){

@@ -46,12 +46,26 @@ public class EduVipTypeController {
         return new ResponseEntity<>(eduVipTypeService.getList(queryCriteria,pageable), HttpStatus.OK);
     }
 
+    @EnableSysLog("【后台】根据ID获取VIP类别数据")
+    @GetMapping("{id}")
+    public BaseResult detail(@PathVariable Long id){
+        return BaseResult.success(eduVipTypeService.findById(id));
+    }
+
     @EnableSysLog("【后台】添加类别数据")
     @PostMapping
     public BaseResult addEduVipType(@RequestBody EduVipType eduVipType){
         eduVipTypeService.addEduVipType(eduVipType);
         return BaseResult.success("添加成功");
     }
+
+    @EnableSysLog("【后台】更新类别数据")
+    @PutMapping
+    public BaseResult editEduVipType(@RequestBody EduVipType eduVipType){
+        eduVipTypeService.editEduVipType(eduVipType);
+        return BaseResult.success("更新成功");
+    }
+
 
     @EnableSysLog("【前台】获取所有会员类型")
     @GetMapping("getAllVip")

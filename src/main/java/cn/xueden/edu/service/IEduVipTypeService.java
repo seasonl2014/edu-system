@@ -32,4 +32,17 @@ public interface IEduVipTypeService {
      * @return
      */
     List<EduVipType> findAll();
+
+    /**
+     * 根据ID获取VIP类别数据
+     * @param id
+     * @return
+     */
+    EduVipType findById(Long id);
+
+    /**
+     * 更新类别数据
+     * @param eduVipType
+     */
+    void editEduVipType(EduVipType eduVipType);
 }
