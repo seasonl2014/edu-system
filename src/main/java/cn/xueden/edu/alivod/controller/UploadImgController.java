@@ -7,10 +7,7 @@ import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 import cn.xueden.edu.domain.EduCourseData;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduStudentBuyVip;
-import cn.xueden.edu.service.IEduCourseDataService;
-import cn.xueden.edu.service.IEduCourseService;
-import cn.xueden.edu.service.IEduStudentBuyCourseService;
-import cn.xueden.edu.service.IEduStudentBuyVipService;
+import cn.xueden.edu.service.*;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.JWTUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -47,12 +44,15 @@ public class UploadImgController {
 
     private final IEduCourseDataService eduCourseDataService;
 
-    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService) {
+    private final IEduBannerService eduBannerService;
+
+    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService, IEduBannerService eduBannerService) {
         this.eduCourseService = eduCourseService;
         this.aliVodeUploadImageLocalFileService = aliVodeUploadImageLocalFileService;
         this.eduStudentBuyCourseService = eduStudentBuyCourseService;
         this.eduStudentBuyVipService = eduStudentBuyVipService;
         this.eduCourseDataService = eduCourseDataService;
+        this.eduBannerService = eduBannerService;
     }
 
     @EnableSysLog("【后台】上传课程封面")
@@ -174,6 +174,17 @@ public class UploadImgController {
 
         }
         return false;
+    }
+
+
+    @EnableSysLog("【后台】上传轮播图封面")
+    @PostMapping("uploadBanner")
+    public BaseResult uploadBanner(@RequestParam("fileResource") MultipartFile fileResource,
+                                  @RequestParam(value = "bannerId",required = false) Long bannerId){
+        System.out.println("获取轮播图ID："+bannerId);
+        Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadImageLocalFile(fileResource,"course");
+        eduBannerService.uploadBanner(bannerId,map.get("urlPath").toString());
+        return BaseResult.success(map);
     }
 
 }
