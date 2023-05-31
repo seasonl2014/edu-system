@@ -59,7 +59,7 @@ public class EduCourseChapterServiceImpl implements IEduCourseChapterService {
     @Override
     public void addEduChapter(EduCourseChapter eduCourseChapter) {
         // 更新课程大纲中的大章
-        if(eduCourseChapter.getId()!=null){
+        if(eduCourseChapter.getId()!=null&&eduCourseChapter.getId()>0){
             EduCourseChapter dbEduCourseChapter = eduCourseChapterRepository.getReferenceById(eduCourseChapter.getId());
             BeanUtil.copyProperties(eduCourseChapter,dbEduCourseChapter, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
             eduCourseChapterRepository.save(dbEduCourseChapter);

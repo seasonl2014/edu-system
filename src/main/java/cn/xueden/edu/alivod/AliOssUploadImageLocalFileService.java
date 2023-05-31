@@ -2,7 +2,7 @@ package cn.xueden.edu.alivod;
 
 import cn.hutool.core.date.DateTime;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
-import cn.xueden.edu.domain.EduCourse;
+
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PutObjectRequest;
