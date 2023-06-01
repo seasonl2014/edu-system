@@ -12,6 +12,7 @@ import cn.xueden.edu.service.dto.EduVipTypeQueryCriteria;
 import cn.xueden.utils.PageVo;
 import cn.xueden.utils.XuedenUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -78,7 +79,7 @@ public class EduVipTypeController {
     public BaseResult buyVip(@PathVariable Long id,
                              HttpServletRequest request){
         String studentToken = request.getHeader("studentToken");
-        if(studentToken==null||studentToken.equals("null")){
+        if(StringUtils.isBlank(studentToken)||studentToken.equals("null")){
             return BaseResult.fail("购买失败，请先登录！");
         }
         if(id==null){
