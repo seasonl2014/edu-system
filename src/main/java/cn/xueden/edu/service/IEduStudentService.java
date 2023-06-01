@@ -112,4 +112,17 @@ public interface IEduStudentService {
      * @param passWordModel
      */
     void savePassWord(PassWordModel passWordModel, Long studentId);
+
+    /**
+     * 找回密码发送手机验证码
+     * @param phone
+     * @return
+     */
+    Integer findPwdSendSms(String phone);
+
+    /**
+     * 保存重新设置的密码
+     * @param passWordModel
+     */
+    void saveFindPassWord(PassWordModel passWordModel);
 }

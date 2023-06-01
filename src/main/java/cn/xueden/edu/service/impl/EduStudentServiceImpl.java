@@ -285,4 +285,38 @@ public class EduStudentServiceImpl implements IEduStudentService {
         dbEduStudent.setPassword(Md5Util.Md5(passWordModel.getResNewPassWord()));
         studentRepository.save(dbEduStudent);
     }
+
+    /**
+     * 找回密码发送手机验证码
+     * @param phone
+     * @return
+     */
+    @Override
+    public Integer findPwdSendSms(String phone) {
+       // 根据手机号查询学员信息
+        EduStudent eduStudent = studentRepository.findByPhone(phone);
+        if(eduStudent==null){
+            throw new BadRequestException("发送验证码失败，该手机号没有注册过！");
+        }else {
+            // 随机生成6位数数
+            Integer code = XuedenUtil.randomSixNums();
+            SendSmsService.SendCodeByPhone(code.toString(),phone);
+            return code;
+        }
+    }
+
+    /**
+     * 保存重新设置的密码
+     * @param passWordModel
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveFindPassWord(PassWordModel passWordModel) {
+        // 根据手机号获取学员信息
+        EduStudent dbEduStudent = studentRepository.findByPhone(passWordModel.getMobile());
+        if(dbEduStudent!=null){
+            dbEduStudent.setPassword(Md5Util.Md5(passWordModel.getNewPassWord()));
+            studentRepository.save(dbEduStudent);
+        }
+    }
 }
