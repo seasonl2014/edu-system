@@ -315,6 +315,18 @@ public class EduStudentServiceImpl implements IEduStudentService {
         // 根据手机号获取学员信息
         EduStudent dbEduStudent = studentRepository.findByPhone(passWordModel.getMobile());
         if(dbEduStudent!=null){
+            if(dbEduStudent.getStuNo()==null){
+                // 获取一个学号
+                EduStudentId dbEduStudentId =  eduStudentIdRepository.findFirstByStatus(0);
+                if(dbEduStudentId==null){
+                    throw new BadRequestException("修改失败，学生编号已经用完，请先生成学号!");
+                }else {
+                    dbEduStudent.setStuNo(dbEduStudentId.getStudentId().toString());
+                    // 把学号状态更新为1，已使用
+                    dbEduStudentId.setStatus(1);
+                    eduStudentIdRepository.save(dbEduStudentId);
+                }
+            }
             dbEduStudent.setPassword(Md5Util.Md5(passWordModel.getNewPassWord()));
             studentRepository.save(dbEduStudent);
         }
