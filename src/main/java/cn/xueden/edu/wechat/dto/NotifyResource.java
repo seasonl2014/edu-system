@@ -1,6 +1,6 @@
 package cn.xueden.edu.wechat.dto;
 
-import com.aliyun.oss.model.Payer;
+
 import lombok.Data;
 
 /**微信支付处理结果 解析结果类
