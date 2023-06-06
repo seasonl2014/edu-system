@@ -1,9 +1,15 @@
 package cn.xueden.edu.alivod;
 
+import cn.xueden.websocket.WebSocketServer;
 import com.aliyun.oss.event.ProgressEvent;
 import com.aliyun.oss.event.ProgressEventType;
 import com.aliyun.vod.upload.impl.VoDProgressListener;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**功能描述：视频上传进度回调方法类
  * @author:梁志杰
@@ -102,6 +108,18 @@ public class PutVodProgressListener implements VoDProgressListener {
                     // 将进度percent放入request中
                     request.getServletContext().setAttribute("upload_video_percent"+id,percent);
                     request.getServletContext().setAttribute("upload_video_percent"+fileKey,percent);
+                    try {
+                        Map<String, Object> map = new HashMap<String, Object>();
+                        ObjectMapper mapper = new ObjectMapper();
+                        map.put("status", 1);
+                        map.put("id", id);
+                        map.put("fileKey", fileKey);
+                        map.put("percent", percent);
+                        String json = mapper.writeValueAsString(map);
+                        WebSocketServer.sendInfo(json,id+fileKey);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     System.out.println(bytes + " bytes have been written at this time, upload sub total4 : " +
                             "(" + this.bytesWritten + ")");

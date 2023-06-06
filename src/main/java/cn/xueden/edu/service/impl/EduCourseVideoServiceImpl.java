@@ -1,6 +1,8 @@
 package cn.xueden.edu.service.impl;
 
+import cn.xueden.edu.domain.EduCourseChapter;
 import cn.xueden.edu.domain.EduCourseVideo;
+import cn.xueden.edu.repository.EduCourseChapterRepository;
 import cn.xueden.edu.repository.EduCourseVideoRepository;
 import cn.xueden.edu.service.IEduCourseVideoService;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,11 @@ public class EduCourseVideoServiceImpl implements IEduCourseVideoService {
 
     private final EduCourseVideoRepository eduCourseVideoRepository;
 
-    public EduCourseVideoServiceImpl(EduCourseVideoRepository eduCourseVideoRepository) {
+    private final EduCourseChapterRepository eduCourseChapterRepository;
+
+    public EduCourseVideoServiceImpl(EduCourseVideoRepository eduCourseVideoRepository, EduCourseChapterRepository eduCourseChapterRepository) {
         this.eduCourseVideoRepository = eduCourseVideoRepository;
+        this.eduCourseChapterRepository = eduCourseChapterRepository;
     }
 
     /**
@@ -39,7 +44,7 @@ public class EduCourseVideoServiceImpl implements IEduCourseVideoService {
      */
     @Override
     public EduCourseVideo findByFileKey(String fileKey) {
-        return eduCourseVideoRepository.findByFileKey(fileKey);
+        return eduCourseVideoRepository.findFirstByFileKey(fileKey);
     }
 
     /**
@@ -77,5 +82,33 @@ public class EduCourseVideoServiceImpl implements IEduCourseVideoService {
             dbEduCourseVideo.setDuration(tempEduCourseVideo.getDuration());
             eduCourseVideoRepository.save(dbEduCourseVideo);
         }
+    }
+
+    /**
+     * 极速秒传保存数据
+     * @param id 章节ID
+     * @param dbEduCourseVideo 已经存在的视频对象
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveUpload(Long id, EduCourseVideo dbEduCourseVideo) {
+
+        //获取大章信息
+        EduCourseChapter eduChapter = eduCourseChapterRepository.getReferenceById(id);
+
+        EduCourseVideo tempEduCourseVideo = new EduCourseVideo();
+        tempEduCourseVideo.setCourseId(eduChapter.getCourseId());
+        tempEduCourseVideo.setChapterId(id);
+        tempEduCourseVideo.setFileKey(dbEduCourseVideo.getFileKey());
+        tempEduCourseVideo.setDuration(dbEduCourseVideo.getDuration());
+        tempEduCourseVideo.setVideoSourceId(dbEduCourseVideo.getVideoSourceId());
+        tempEduCourseVideo.setIsFree(1);
+        tempEduCourseVideo.setSort(0);
+        tempEduCourseVideo.setVersion(1L);
+        tempEduCourseVideo.setPlayCount(0L);
+        tempEduCourseVideo.setSize(dbEduCourseVideo.getSize());
+        tempEduCourseVideo.setTitle(dbEduCourseVideo.getTitle());
+        tempEduCourseVideo.setVideoOriginalName(dbEduCourseVideo.getVideoOriginalName());
+        eduCourseVideoRepository.save(tempEduCourseVideo);
     }
 }

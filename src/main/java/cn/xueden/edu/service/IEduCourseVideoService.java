@@ -42,4 +42,11 @@ public interface IEduCourseVideoService {
      * @param dbEduCourseVideo
      */
     void updateByCourseVideo(Long id, EduCourseVideo dbEduCourseVideo);
+
+    /**
+     * 极速秒传保存视频
+     * @param id 章节ID
+     * @param dbEduCourseVideo 已经存在的视频对象
+     */
+    void saveUpload(Long id, EduCourseVideo dbEduCourseVideo);
 }

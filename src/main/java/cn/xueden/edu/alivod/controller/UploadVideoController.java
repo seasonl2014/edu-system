@@ -6,6 +6,8 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.service.IVodService;
 import cn.xueden.edu.domain.EduCourseVideo;
 import cn.xueden.edu.service.IEduCourseVideoService;
+import cn.xueden.websocket.WebSocketServer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +50,22 @@ public class UploadVideoController {
        EduCourseVideo dbEduCourseVideo = eduCourseVideoService.findByFileKey(fileKey);
        if(dbEduCourseVideo!=null){
            map.put("videoSourceId",dbEduCourseVideo.getVideoSourceId());
+           eduCourseVideoService.saveUpload(id,dbEduCourseVideo);
+           // 进度条 Start
+           try {
+               Map<String, Object> resultMap = new HashMap<String, Object>();
+               ObjectMapper mapper = new ObjectMapper();
+               resultMap.put("status", 1);
+               resultMap.put("id", id);
+               resultMap.put("fileKey", fileKey);
+               resultMap.put("percent", 100);
+               String json = mapper.writeValueAsString(resultMap);
+               WebSocketServer.sendInfo(json,id+fileKey);
+           } catch (IOException e) {
+               throw new RuntimeException(e);
+           }
+           // 进度条 end
+
            return BaseResult.success("极速秒传完成");
        }else {
            String videoSourceId = vodService.batchUploadAliyunVideoById(file,id,request,fileKey);

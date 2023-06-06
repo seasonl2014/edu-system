@@ -30,4 +30,11 @@ public interface EduCourseVideoRepository extends JpaRepository<EduCourseVideo, 
      * @return
      */
     EduCourseVideo findByFileKey(String fileKey);
+
+    /**
+     * 根据文件KEY查找第一条记录
+     * @param fileKey
+     * @return
+     */
+    EduCourseVideo findFirstByFileKey(String fileKey);
 }
