@@ -1,8 +1,11 @@
 package cn.xueden.edu.alivod.controller;
 
+import cn.hutool.core.date.DateTime;
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
+import cn.xueden.edu.alivod.AliOssMultipartUploadFileService;
 import cn.xueden.edu.alivod.AliOssUploadImageLocalFileService;
+import cn.xueden.edu.alivod.service.IChunkService;
 import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 import cn.xueden.edu.domain.EduCourseData;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
@@ -10,6 +13,7 @@ import cn.xueden.edu.domain.EduStudentBuyVip;
 import cn.xueden.edu.service.*;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.JWTUtil;
+import com.aliyuncs.exceptions.ClientException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.io.IOUtils;
 import com.aliyun.oss.OSS;
@@ -17,12 +21,17 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.OSSObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**功能描述：上传图片到阿里视频点播平台自带的OSS
  * @author:梁志杰
@@ -33,6 +42,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("aliVod/upload")
 public class UploadImgController {
+    Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Value("${file.path}")
+    private String filePath;
 
     private final IEduCourseService eduCourseService;
 
@@ -46,13 +59,19 @@ public class UploadImgController {
 
     private final IEduBannerService eduBannerService;
 
-    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService, IEduBannerService eduBannerService) {
+    private final IChunkService chunkService;
+
+    private final AliOssMultipartUploadFileService aliOssMultipartUploadFileService;
+
+    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService, IEduBannerService eduBannerService, IChunkService chunkService, AliOssMultipartUploadFileService aliOssMultipartUploadFileService) {
         this.eduCourseService = eduCourseService;
         this.aliVodeUploadImageLocalFileService = aliVodeUploadImageLocalFileService;
         this.eduStudentBuyCourseService = eduStudentBuyCourseService;
         this.eduStudentBuyVipService = eduStudentBuyVipService;
         this.eduCourseDataService = eduCourseDataService;
         this.eduBannerService = eduBannerService;
+        this.chunkService = chunkService;
+        this.aliOssMultipartUploadFileService = aliOssMultipartUploadFileService;
     }
 
     @EnableSysLog("【后台】上传课程封面")
@@ -185,6 +204,70 @@ public class UploadImgController {
         Map<String,Object> map = aliVodeUploadImageLocalFileService.uploadImageLocalFile(fileResource,"course");
         eduBannerService.uploadBanner(bannerId,map.get("urlPath").toString());
         return BaseResult.success(map);
+    }
+
+    @EnableSysLog("【后台】根据文件唯一标志获取课程资料")
+    @GetMapping("/check/{fileKey}")
+    public BaseResult getCourseDataByKey(@PathVariable String fileKey){
+        Map<String,Object> map = new HashMap<>();
+        // 根据fileKey查询数据
+        EduCourseData dbEduCourseData = eduCourseDataService.findByFileKey(fileKey);
+        if(dbEduCourseData!=null){
+            map.put("isUploaded",true);
+            return BaseResult.success("极速秒传成功",map);
+        }else {
+            //如果没有，就查找分片信息，并返回给前端
+            List<Integer> chunkList = chunkService.selectChunkListByMd5(fileKey);
+            map.put("chunkList",chunkList);
+            map.put("isUploaded",false);
+            return BaseResult.success(map);
+        }
+    }
+
+    @EnableSysLog("分片上传课程资料")
+    @PostMapping("chunk")
+    public BaseResult chunk(@RequestParam("chunk") MultipartFile chunk,
+                            @RequestParam("md5") String md5,
+                            @RequestParam("index") Integer index,
+                            @RequestParam("chunkTotal")Integer chunkTotal,
+                            @RequestParam("fileSize")Long fileSize,
+                            @RequestParam("fileName")String fileName,
+                            @RequestParam("chunkSize")Long chunkSize,
+                            @RequestParam("courseId")Long courseId) throws IOException, ClientException {
+
+        String[] splits = fileName.split("\\.");
+        String type = splits[splits.length-1];
+        String resultFileName = filePath+md5+"."+type;
+        chunkService.saveChunk(chunk,md5,index,chunkSize,resultFileName,courseId);
+
+        // 上传到阿里云oss文件名称
+        // 1、获取文件后缀名
+        String substring = "."+type;
+        //构建日期名称：2020-02-03
+        String fileDate = new DateTime().toString("yyyy-MM-dd");
+        String filename = md5+"-"+fileDate+"-"+courseId+substring;
+        String hostName = ConstantPropertiesUtil.HOST_COURSE;
+        String objectName = hostName+"/"+filename;
+        logger.info("上传分片："+index +" ,"+chunkTotal+","+fileName+","+resultFileName);
+        if(Objects.equals(index, chunkTotal)){
+            EduCourseData tempEduCourseData = new EduCourseData();
+            tempEduCourseData.setCourseId(courseId);
+            tempEduCourseData.setName(fileName);
+            tempEduCourseData.setDownloadAddress(objectName);
+            tempEduCourseData.setFileKey(md5);
+            tempEduCourseData.setFileSize(fileSize);
+            // 上传到服务器完成，开始上传到阿里云oss
+            aliOssMultipartUploadFileService.uploadChunkFile(resultFileName,objectName,courseId);
+            chunkService.deleteChunkByMd5(md5);
+            eduCourseDataService.save(tempEduCourseData);
+            // 删除本地临时文件
+            Path tempPath = Paths.get(resultFileName);
+            Files.delete(tempPath);
+            return BaseResult.success("文件上传成功");
+        }else{
+            return BaseResult.success("分片上传成功");
+        }
+        
     }
 
 }

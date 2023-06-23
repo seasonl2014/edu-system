@@ -75,4 +75,14 @@ public class EduCourseDataServiceImpl implements IEduCourseDataService {
     public EduCourseData findByFileKey(String fileKey) {
         return eduCourseDataRepository.findFirstByFileKey(fileKey);
     }
+
+    /**
+     * 保存记录
+     * @param tempEduCourseData
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void save(EduCourseData tempEduCourseData) {
+        eduCourseDataRepository.save(tempEduCourseData);
+    }
 }

@@ -44,4 +44,10 @@ public interface IEduCourseDataService {
      * @return
      */
     EduCourseData findByFileKey(String fileKey);
+
+    /**
+     * 保存数据
+     * @param tempEduCourseData
+     */
+    void save(EduCourseData tempEduCourseData);
 }

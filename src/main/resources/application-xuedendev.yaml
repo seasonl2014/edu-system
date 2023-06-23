@@ -36,7 +36,8 @@ spring:
 # 用户头像存放路径
 user:
   icon: E:\\edu-mangement-system\\
-
+file:
+  path: D:\\upload2\\
 # ip2region
 ip2region:
   enabled: true

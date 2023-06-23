@@ -41,4 +41,9 @@ public class EduCourseData extends BaseEntity {
      */
     private String fileKey;
 
+    /**
+     * 文件大小
+     */
+    private Long fileSize;
+
 }
