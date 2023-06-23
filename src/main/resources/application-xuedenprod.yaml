@@ -32,7 +32,8 @@ spring:
 # 用户头像存放路径
 user:
   icon: /home/edu-xueden/file/
-
+file:
+  path: /home/edu-xueden/file/
 aliyun: #阿里云 vod
   vod: #不同的服务器，地址不同
     file:
