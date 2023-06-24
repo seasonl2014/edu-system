@@ -1,5 +1,12 @@
 server:
   port: 9999
+  tomcat:
+    connection-timeout: 36000000
+    max-swallow-size: 500MB
+    max-http-form-post-size: 500MB
+    background-processor-delay: 36000000
+    keep-alive-timeout: 36000000
+
 # ?????
 spring:
   servlet:
