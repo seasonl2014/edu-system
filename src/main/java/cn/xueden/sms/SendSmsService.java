@@ -1,6 +1,10 @@
 package cn.xueden.sms;
 
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
+import cn.xueden.edu.domain.EduAliOss;
+import cn.xueden.edu.domain.EduSms;
+import cn.xueden.edu.repository.EduAliOssRepository;
+import cn.xueden.edu.repository.EduSmsRepository;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -9,6 +13,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
+import org.springframework.stereotype.Component;
 
 /**功能描述：阿里云短信发送
  * @author:梁志杰
@@ -16,7 +21,16 @@ import com.aliyuncs.profile.DefaultProfile;
  * @description:cn.xueden.sms
  * @version:1.0
  */
+@Component
 public class SendSmsService {
+    private  final EduSmsRepository eduSmsRepository;
+
+    private final EduAliOssRepository eduAliOssRepository;
+
+    public SendSmsService(EduSmsRepository eduSmsRepository, EduAliOssRepository eduAliOssRepository) {
+        this.eduSmsRepository = eduSmsRepository;
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
 
     /**
      * 给手机发送验证码
@@ -24,8 +38,12 @@ public class SendSmsService {
      * @param phone
      * @return
      */
-    public static String SendCodeByPhone(String code,String phone) {
-        DefaultProfile profile = DefaultProfile.getProfile(ConstantPropertiesUtil.SMS_REGIONID, ConstantPropertiesUtil.ACCESS_KEY_ID, ConstantPropertiesUtil.ACCESS_KEY_SECRET);
+    public  String sendCodeByPhone(String code,String phone) {
+        // 获取阿里云对象存储信息
+        EduSms dbEduSms = eduSmsRepository.findFirstByOrderByIdDesc();
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+        DefaultProfile profile = DefaultProfile.getProfile(dbEduSms.getRegionId(), dbEduAliOss.getAccessKeyID(), dbEduAliOss.getAccessKeySecret());
         IAcsClient client = new DefaultAcsClient(profile);
 
         CommonRequest request = new CommonRequest();
@@ -33,10 +51,10 @@ public class SendSmsService {
         request.setSysDomain("dysmsapi.aliyuncs.com");
         request.setSysVersion("2017-05-25");
         request.setSysAction("SendSms");
-        request.putQueryParameter("RegionId", ConstantPropertiesUtil.SMS_REGIONID);
+        request.putQueryParameter("RegionId", dbEduSms.getRegionId());
         request.putQueryParameter("PhoneNumbers", phone);
-        request.putQueryParameter("SignName", ConstantPropertiesUtil.SIGN_NAME);
-        request.putQueryParameter("TemplateCode", ConstantPropertiesUtil.TEMPLATE_CODE);
+        request.putQueryParameter("SignName", dbEduSms.getSignName());
+        request.putQueryParameter("TemplateCode", dbEduSms.getTemplateCode());
         request.putQueryParameter("TemplateParam", "{\"code\":\""+code+"\"}");
         try {
             CommonResponse response = client.getCommonResponse(request);

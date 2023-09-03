@@ -52,11 +52,14 @@ public class EduStudentServiceImpl implements IEduStudentService {
 
     private final EduCourseRepository eduCourseRepository;
 
-    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository) {
+    private final SendSmsService sendSmsService;
+
+    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, SendSmsService sendSmsService) {
         this.studentRepository = studentRepository;
         this.eduStudentIdRepository = eduStudentIdRepository;
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
         this.eduCourseRepository = eduCourseRepository;
+        this.sendSmsService = sendSmsService;
     }
 
     /**
@@ -250,7 +253,7 @@ public class EduStudentServiceImpl implements IEduStudentService {
     public Integer sendSms(String phone, Long studentId) {
         // 随机生成6位数数
         Integer code = XuedenUtil.randomSixNums();
-        SendSmsService.SendCodeByPhone(code.toString(),phone);
+        sendSmsService.sendCodeByPhone(code.toString(),phone);
         return code;
     }
 
@@ -300,7 +303,7 @@ public class EduStudentServiceImpl implements IEduStudentService {
         }else {
             // 随机生成6位数数
             Integer code = XuedenUtil.randomSixNums();
-            SendSmsService.SendCodeByPhone(code.toString(),phone);
+            sendSmsService.sendCodeByPhone(code.toString(),phone);
             return code;
         }
     }
