@@ -1,5 +1,7 @@
 package cn.xueden.edu.service.impl;
 
+import cn.xueden.edu.domain.EduAliOss;
+import cn.xueden.edu.repository.EduAliOssRepository;
 import cn.xueden.edu.service.IEduAliOssService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,4 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class EduAliOssServiceImpl implements IEduAliOssService {
+
+    private final EduAliOssRepository eduAliOssRepository;
+
+    public EduAliOssServiceImpl(EduAliOssRepository eduAliOssRepository) {
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
+
+    /**
+     * 获取一条记录
+     * @return
+     */
+    @Override
+    public EduAliOss getOne() {
+        return eduAliOssRepository.findFirstByOrderByIdDesc();
+    }
 }

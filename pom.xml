@@ -114,14 +114,14 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.28</version>
+            <version>1.2.31</version>
         </dependency>
 
         <!--微信支付-->
         <dependency>
             <groupId>com.github.wechatpay-apiv3</groupId>
             <artifactId>wechatpay-apache-httpclient</artifactId>
-            <version>0.4.4</version>
+            <version>0.4.8</version>
         </dependency>
 
         <!--微信扫码登录用到-->
