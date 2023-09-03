@@ -1,7 +1,9 @@
 package cn.xueden.edu.alivod;
 
 import cn.xueden.edu.alivod.dto.CategoryDto;
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
+import cn.xueden.edu.domain.EduAliOss;
+import cn.xueden.edu.repository.EduAliOssRepository;
 import cn.xueden.edu.vo.EduSubjectModel;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.vod.model.v20170321.AddCategoryRequest;
@@ -17,13 +19,21 @@ import static cn.xueden.edu.alivod.utils.AliyunVODSDKUtils.initVodClient;
 @Component
 public class AliVodCategoryService {
 
+    private final EduAliOssRepository eduAliOssRepository;
+
+    public AliVodCategoryService(EduAliOssRepository eduAliOssRepository) {
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
+
     /**
      * 添加阿里云视频点播分类
      */
     public CategoryDto addAliVodCategory(EduSubjectModel eduSubjectModel){
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
         CategoryDto categoryDto = new CategoryDto();
         try {
-            DefaultAcsClient client = initVodClient(ConstantPropertiesUtil.ACCESS_KEY_ID, ConstantPropertiesUtil.ACCESS_KEY_SECRET);
+            DefaultAcsClient client = initVodClient(dbEduAliOss.getAccessKeyID(), dbEduAliOss.getAccessKeySecret());
             AddCategoryResponse response = new AddCategoryResponse();
             AddCategoryRequest request = new AddCategoryRequest();
             // 分类名称

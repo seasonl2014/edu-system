@@ -3,7 +3,7 @@ package cn.xueden.edu.controller;
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.utils.AliyunVODSDKUtils;
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
 import cn.xueden.edu.domain.*;
 import cn.xueden.edu.service.*;
 import cn.xueden.edu.vo.EduCourseModel;
@@ -53,7 +53,9 @@ public class EduDetailController {
 
     private final IEduCourseDataService eduCourseDataService;
 
-    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseVideoService eduCourseVideoService, IEduCourseDataService eduCourseDataService) {
+    private final IEduAliOssService eduAliOssService;
+
+    public EduDetailController(IEduCourseService eduCourseService, IEduEnvironmenParamService eduEnvironmenParamService, IEduCourseChapterService eduCourseChapterService, IEduTeacherService teacherService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseVideoService eduCourseVideoService, IEduCourseDataService eduCourseDataService, IEduAliOssService eduAliOssService) {
         this.eduCourseService = eduCourseService;
         this.eduEnvironmenParamService = eduEnvironmenParamService;
         this.eduCourseChapterService = eduCourseChapterService;
@@ -62,6 +64,7 @@ public class EduDetailController {
         this.eduStudentBuyVipService = eduStudentBuyVipService;
         this.eduCourseVideoService = eduCourseVideoService;
         this.eduCourseDataService = eduCourseDataService;
+        this.eduAliOssService = eduAliOssService;
     }
 
     @EnableSysLog("【前台】根据课程ID获取课程详情详细")
@@ -157,8 +160,9 @@ public class EduDetailController {
     @PostMapping("getPlayAuth2/{vid}")
     public BaseResult getPlayAutoId2(@PathVariable String vid){
         try {
+            EduAliOss dbEduAliOss = eduAliOssService.getOne();
             //初始化客户端、请求对象和相应对象
-            DefaultAcsClient client = AliyunVODSDKUtils.initVodClient(ConstantPropertiesUtil.ACCESS_KEY_ID, ConstantPropertiesUtil.ACCESS_KEY_SECRET);
+            DefaultAcsClient client = AliyunVODSDKUtils.initVodClient(dbEduAliOss.getAccessKeyID(), dbEduAliOss.getAccessKeySecret());
 
             GetVideoPlayAuthRequest request = new GetVideoPlayAuthRequest();
             GetVideoPlayAuthResponse response = new GetVideoPlayAuthResponse();

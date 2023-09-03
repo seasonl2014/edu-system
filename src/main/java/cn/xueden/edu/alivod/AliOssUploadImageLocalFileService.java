@@ -1,8 +1,10 @@
 package cn.xueden.edu.alivod;
 
 import cn.hutool.core.date.DateTime;
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
 
+
+import cn.xueden.edu.domain.EduAliOss;
+import cn.xueden.edu.repository.EduAliOssRepository;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PutObjectRequest;
@@ -27,15 +29,23 @@ import java.util.UUID;
  */
 @Component
 public class AliOssUploadImageLocalFileService {
+    private final EduAliOssRepository eduAliOssRepository;
+
+    public AliOssUploadImageLocalFileService(EduAliOssRepository eduAliOssRepository) {
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
 
     public Map<String, Object> uploadImageLocalFile(MultipartFile fileResource, String host) {
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+
         // Endpoint (地域 如：上海)
-        String endpoint = ConstantPropertiesUtil.END_POINT;
+        String endpoint = dbEduAliOss.getEndpoint();
         // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
-        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
-        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
-        String yourBucketName = ConstantPropertiesUtil.BUCKET_NAME;
-        String hostpath = ConstantPropertiesUtil.HOST_PATH;
+        String accessKeyId = dbEduAliOss.getAccessKeyID();
+        String accessKeySecret = dbEduAliOss.getAccessKeySecret();
+        String yourBucketName = dbEduAliOss.getBucketName();
+        String hostpath = dbEduAliOss.getHostPath();
         try {
             //1、获取到上传文件MultipartFile file 名称
             String filename = fileResource.getOriginalFilename();
@@ -45,7 +55,7 @@ public class AliOssUploadImageLocalFileService {
             filename = uuid+fileExtension;
             //构建日期路径：2020/02/03
             String filePath = new DateTime().toString("yyyy/MM/dd");
-            String hostName = ConstantPropertiesUtil.HOST;
+            String hostName = dbEduAliOss.getFileHost();
             //如果上传的是头像，则host里为空，如果上传封面host则有值
             if (StringUtils.isNotEmpty(host)) {
                 hostName = host;
@@ -79,10 +89,12 @@ public class AliOssUploadImageLocalFileService {
      * @return
      */
     public Map<String,Object> uploadCourseResource(MultipartFile file, Long courseId, HttpServletRequest request,String fileKey){
-        String endpoint = ConstantPropertiesUtil.END_POINT;
-        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
-        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
-        String yourBucketName = ConstantPropertiesUtil.BUCKET_COURSE_NAME;
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+        String endpoint = dbEduAliOss.getEndpoint();
+        String accessKeyId = dbEduAliOss.getAccessKeyID();
+        String accessKeySecret = dbEduAliOss.getAccessKeySecret();
+        String yourBucketName = dbEduAliOss.getBucketCourseName();
         try {
             //1、获取到上传文件MultipartFile file
             String filename = file.getOriginalFilename();
@@ -96,7 +108,7 @@ public class AliOssUploadImageLocalFileService {
             String fileDate = new DateTime().toString("yyyy-MM-dd");
             filename = uuid+"-"+fileDate+"-"+courseId+substring;
 
-            String hostName = ConstantPropertiesUtil.HOST_COURSE;
+            String hostName = dbEduAliOss.getFileHostCourse();
 
             filename = hostName+"/"+filename;
 

@@ -6,7 +6,8 @@ import cn.xueden.base.BaseResult;
 import cn.xueden.edu.alivod.AliOssMultipartUploadFileService;
 import cn.xueden.edu.alivod.AliOssUploadImageLocalFileService;
 import cn.xueden.edu.alivod.service.IChunkService;
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
+import cn.xueden.edu.domain.EduAliOss;
 import cn.xueden.edu.domain.EduCourseData;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduStudentBuyVip;
@@ -63,7 +64,9 @@ public class UploadImgController {
 
     private final AliOssMultipartUploadFileService aliOssMultipartUploadFileService;
 
-    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService, IEduBannerService eduBannerService, IChunkService chunkService, AliOssMultipartUploadFileService aliOssMultipartUploadFileService) {
+    private final IEduAliOssService eduAliOssService;
+
+    public UploadImgController(IEduCourseService eduCourseService, AliOssUploadImageLocalFileService aliVodeUploadImageLocalFileService, IEduStudentBuyCourseService eduStudentBuyCourseService, IEduStudentBuyVipService eduStudentBuyVipService, IEduCourseDataService eduCourseDataService, IEduBannerService eduBannerService, IChunkService chunkService, AliOssMultipartUploadFileService aliOssMultipartUploadFileService, IEduAliOssService eduAliOssService) {
         this.eduCourseService = eduCourseService;
         this.aliVodeUploadImageLocalFileService = aliVodeUploadImageLocalFileService;
         this.eduStudentBuyCourseService = eduStudentBuyCourseService;
@@ -72,6 +75,7 @@ public class UploadImgController {
         this.eduBannerService = eduBannerService;
         this.chunkService = chunkService;
         this.aliOssMultipartUploadFileService = aliOssMultipartUploadFileService;
+        this.eduAliOssService = eduAliOssService;
     }
 
     @EnableSysLog("【后台】上传课程封面")
@@ -135,12 +139,15 @@ public class UploadImgController {
      */
     @GetMapping("/downFileFromOss")
     public void downFileFromOss(HttpServletRequest request, HttpServletResponse response){
+
+        EduAliOss dbEduAliOss = eduAliOssService.getOne();
+
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/octet-stream");
-        String yourBucketName = ConstantPropertiesUtil.BUCKET_COURSE_NAME;
-        String endpoint = ConstantPropertiesUtil.END_POINT;
-        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
-        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
+        String yourBucketName = dbEduAliOss.getBucketCourseName();
+        String endpoint = dbEduAliOss.getEndpoint();
+        String accessKeyId = dbEduAliOss.getAccessKeyID();
+        String accessKeySecret = dbEduAliOss.getAccessKeySecret();
         String fileName = request.getParameter("fileName");
         response.addHeader("Content-Disposition", "attachment;filename="+fileName);
         try {
@@ -239,14 +246,14 @@ public class UploadImgController {
         String type = splits[splits.length-1];
         String resultFileName = filePath+md5+"."+type;
         chunkService.saveChunk(chunk,md5,index,chunkSize,resultFileName,courseId);
-
+        EduAliOss dbEduAliOss = eduAliOssService.getOne();
         // 上传到阿里云oss文件名称
         // 1、获取文件后缀名
         String substring = "."+type;
         //构建日期名称：2020-02-03
         String fileDate = new DateTime().toString("yyyy-MM-dd");
         String filename = md5+"-"+fileDate+"-"+courseId+substring;
-        String hostName = ConstantPropertiesUtil.HOST_COURSE;
+        String hostName = dbEduAliOss.getFileHostCourse();
         String objectName = hostName+"/"+filename;
         logger.info("上传分片："+index +" ,"+chunkTotal+","+fileName+","+resultFileName);
         if(Objects.equals(index, chunkTotal)){

@@ -1,7 +1,9 @@
 package cn.xueden.edu.alivod;
 
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
+import cn.xueden.edu.domain.EduAliOss;
 import cn.xueden.edu.domain.EduCourseVideo;
+import cn.xueden.edu.repository.EduAliOssRepository;
 import com.aliyun.vod.upload.impl.UploadVideoImpl;
 import com.aliyun.vod.upload.req.UploadStreamRequest;
 import com.aliyun.vod.upload.resp.UploadStreamResponse;
@@ -25,10 +27,20 @@ import static cn.xueden.edu.alivod.utils.AliyunVODSDKUtils.initVodClient;
  */
 @Component
 public class AliOssUploadVideoLocalFileService {
+    private final EduAliOssRepository eduAliOssRepository;
 
-    public EduCourseVideo uploadVideoLocalFile(MultipartFile file, Long cateId, HttpServletRequest servletRequest,Long id,String fileKey){
-        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
-        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
+    public AliOssUploadVideoLocalFileService(EduAliOssRepository eduAliOssRepository) {
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
+
+    public EduCourseVideo uploadVideoLocalFile(MultipartFile file, Long cateId, HttpServletRequest servletRequest, Long id, String fileKey){
+
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+
+
+        String accessKeyId = dbEduAliOss.getAccessKeyID();
+        String accessKeySecret = dbEduAliOss.getAccessKeySecret();
         try {
             EduCourseVideo eduVideo = new EduCourseVideo();
             String fileName = file.getOriginalFilename();
@@ -73,8 +85,13 @@ public class AliOssUploadVideoLocalFileService {
      */
     public Float getVideoInfo(String videoId){
         try {
+
+            // 获取阿里云对象存储信息
+            EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+
+
             TimeUnit.SECONDS.sleep(5);//秒
-            DefaultAcsClient client = initVodClient(ConstantPropertiesUtil.ACCESS_KEY_ID, ConstantPropertiesUtil.ACCESS_KEY_SECRET);
+            DefaultAcsClient client = initVodClient(dbEduAliOss.getAccessKeyID(), dbEduAliOss.getAccessKeySecret());
             GetVideoInfoResponse response = new GetVideoInfoResponse();
             GetVideoInfoRequest request = new GetVideoInfoRequest();
             request.setVideoId(videoId);

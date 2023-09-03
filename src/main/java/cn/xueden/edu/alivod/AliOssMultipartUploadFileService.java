@@ -1,21 +1,19 @@
 package cn.xueden.edu.alivod;
 
-import cn.hutool.core.date.DateTime;
-import cn.xueden.edu.alivod.utils.ConstantPropertiesUtil;
+
+import cn.xueden.edu.domain.EduAliOss;
+import cn.xueden.edu.repository.EduAliOssRepository;
 import com.aliyun.oss.*;
-import com.aliyun.oss.common.auth.CredentialsProviderFactory;
-import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
+
 import com.aliyun.oss.model.*;
 import com.aliyuncs.exceptions.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+
 
 /**功能描述：阿里云oss分片上传文件
  * @author:梁志杰
@@ -27,18 +25,27 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AliOssMultipartUploadFileService {
 
+    private final EduAliOssRepository eduAliOssRepository;
+
+    public AliOssMultipartUploadFileService(EduAliOssRepository eduAliOssRepository) {
+        this.eduAliOssRepository = eduAliOssRepository;
+    }
+
     /**
      * 参考路径：https://help.aliyun.com/document_detail/31850.htm?spm=a2c4g.84786.0.0.2d4a24cbD90l3j#concept-wzs-2gb-5db
      **/
     public void uploadChunkFile(String resultFileName,String objectName,Long courseId) throws IOException, ClientException {
 
+        // 获取阿里云对象存储信息
+        EduAliOss dbEduAliOss = eduAliOssRepository.findFirstByOrderByIdDesc();
+
         // Endpoint (地域 如：上海)
-        String endpoint = ConstantPropertiesUtil.END_POINT;
+        String endpoint = dbEduAliOss.getEndpoint();
         // 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
-        String accessKeyId = ConstantPropertiesUtil.ACCESS_KEY_ID;
-        String accessKeySecret = ConstantPropertiesUtil.ACCESS_KEY_SECRET;
+        String accessKeyId = dbEduAliOss.getAccessKeyID();
+        String accessKeySecret = dbEduAliOss.getAccessKeySecret();
         // 填写Bucket名称，例如examplebucket。
-        String bucketName = ConstantPropertiesUtil.BUCKET_COURSE_NAME;
+        String bucketName = dbEduAliOss.getBucketCourseName();
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
 
