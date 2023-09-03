@@ -30,9 +30,28 @@ public class EduWxpay extends BaseEntity {
     @Column(name = "merchant_serialnumber")
     private String merchantSerialnumber;
 
-    @Column(name = "merchant_privatekey")
+    @Column(name = "merchant_privatekey",length = 2000)
     private String merchantPrivatekey;
 
     @Column(name = "api_v3")
     private String apiV3;
+
+
+    /**
+     * 购买VIP会员异步回调通知
+     */
+    @Column
+    private String notifyVipUrl;
+
+    /**
+     * 购买课程异步回调通知
+     */
+    @Column
+    private String notifyCourseUrl;
+
+    /**
+     * native支付请求接口
+     */
+    @Column
+    private String nativeV3Api;
 }

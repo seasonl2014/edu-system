@@ -78,7 +78,7 @@ public class SysLog extends BaseEntity {
     /**
      * 返回内容
      */
-    @Column(name = "response")
+    @Column(name = "response",length = 10000)
     private String response;
 
     /**

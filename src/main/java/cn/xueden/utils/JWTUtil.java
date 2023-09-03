@@ -33,8 +33,8 @@ public class JWTUtil {
         //payload
         map.forEach(builder::withClaim);
         Calendar instance = Calendar.getInstance();
-        //7天过期
-        instance.add(Calendar.DATE, 7);
+        //365天过期
+        instance.add(Calendar.DATE, 365);
         //指定令牌的过期时间
         builder.withExpiresAt(instance.getTime());
         return builder.sign(Algorithm.HMAC256(SECRET));

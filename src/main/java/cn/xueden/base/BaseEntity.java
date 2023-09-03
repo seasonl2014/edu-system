@@ -58,7 +58,7 @@ public class BaseEntity implements Serializable {
     /**
      * 备注
      */
-    @Column(name = "remarks")
+    @Column(name = "remarks",length = 100000)
     private String remarks;
 
     /**

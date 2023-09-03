@@ -1,5 +1,8 @@
 package cn.xueden.edu.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+
 import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduWxpayService;
@@ -29,5 +32,24 @@ public class EduWxpayServiceImpl implements IEduWxpayService {
     @Override
     public EduWxpay getOne() {
         return eduWxpayRepository.findAll().get(0);
+    }
+
+    /**
+     * 保存信息
+     * @param eduWxpay
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void save(EduWxpay eduWxpay) {
+        // 更新数据
+        if (eduWxpay.getId()!=null&&eduWxpay.getId()>0){
+            EduWxpay dbEduWxpay = eduWxpayRepository.getReferenceById(eduWxpay.getId());
+            BeanUtil.copyProperties(eduWxpay,dbEduWxpay, CopyOptions.create().setIgnoreError(true).setIgnoreNullValue(true));
+            eduWxpayRepository.save(dbEduWxpay);
+        // 新增数据
+        }else {
+            eduWxpayRepository.save(eduWxpay);
+        }
+
     }
 }

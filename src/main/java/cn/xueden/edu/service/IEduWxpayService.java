@@ -15,4 +15,10 @@ public interface IEduWxpayService {
      * @return
      */
     EduWxpay getOne();
+
+    /**
+     * 保存信息
+     * @param eduWxpay
+     */
+    void save(EduWxpay eduWxpay);
 }
