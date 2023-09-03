@@ -43,7 +43,7 @@ aliyun: #阿里云 vod
     file:
       keyid: LTAI5tGR2JVu7kaPxbkWkn7G
       keysecret: rgYtogbLe9lseA2VjINgfAXzab1Xp2
-      templategroupid: f015b4b2dde5fbc94015cdb18ea1a6ec
+      templategroupid: f015b4b2dde5fbc94015cdb18ea1a6ec # 转码模板组
   oss:
     file:
       endpoint: oss-cn-shanghai.aliyuncs.com

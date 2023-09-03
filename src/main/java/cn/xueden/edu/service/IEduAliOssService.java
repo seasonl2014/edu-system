@@ -15,4 +15,10 @@ public interface IEduAliOssService {
      * @return
      */
     EduAliOss getOne();
+
+    /**
+     * 保存记录
+     * @param eduAliOss
+     */
+    void saveOrUpdate(EduAliOss eduAliOss);
 }

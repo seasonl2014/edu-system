@@ -66,7 +66,7 @@ public class SysLog extends BaseEntity {
     /**
      * 操作提交的数据
      */
-    @Column(name = "params")
+    @Column(name = "params",length = 1000)
     private String params;
 
     /**

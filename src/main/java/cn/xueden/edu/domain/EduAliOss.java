@@ -68,4 +68,10 @@ public class EduAliOss extends BaseEntity {
      */
     @Column
     private String hostPath;
+
+    /**
+     * 转码模板组
+     */
+    @Column
+    private String  templateGroupId;
 }
