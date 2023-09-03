@@ -43,7 +43,7 @@ public class LoginController {
      * @return
      */
     @PostMapping("login")
-    @EnableSysLog("用户登录酒店后台管理系统")
+    @EnableSysLog("【后台】用户登录学灯网后台")
     public BaseResult login(@RequestBody SysUser sysUser,
                             HttpServletRequest request){
         SysUser dbSysUser = sysUserService.login(sysUser);
@@ -81,7 +81,7 @@ public class LoginController {
      * @return
      */
     @GetMapping("logOut")
-    @EnableSysLog("退出酒店后台系统")
+    @EnableSysLog("【后台】用户退出学灯网后台")
     public BaseResult logOut(HttpServletRequest request){
        request.getServletContext().removeAttribute("token");
        return BaseResult.success("退出成功");

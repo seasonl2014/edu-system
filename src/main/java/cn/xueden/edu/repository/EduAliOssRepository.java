@@ -1,17 +1,17 @@
 package cn.xueden.edu.repository;
 
-import cn.xueden.edu.domain.EduSms;
+import cn.xueden.edu.domain.EduAliOss;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-/**功能描述：短信设置持久层
+/**功能描述：阿里云OSS信息配置持久层
  * @author Administrator
  */
-public interface EduSmsRepository extends JpaRepository<EduSms, Integer>, JpaSpecificationExecutor<EduSms> {
+public interface EduAliOssRepository extends JpaRepository<EduAliOss, Integer>, JpaSpecificationExecutor<EduAliOss> {
 
     /**
      * 获取一条记录
      * @return
      */
-    EduSms findFirstByOrderByIdDesc();
+    EduAliOss findFirstByOrderByIdDesc();
 }
