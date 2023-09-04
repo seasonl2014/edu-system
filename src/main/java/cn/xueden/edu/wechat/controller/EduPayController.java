@@ -1,11 +1,10 @@
 package cn.xueden.edu.wechat.controller;
 
-import cn.hutool.json.JSONUtil;
+
 
 import cn.xueden.edu.domain.*;
 import cn.xueden.edu.service.*;
-import cn.xueden.edu.wechat.config.WechatConfig;
-import cn.xueden.edu.wechat.dto.NotifyResource;
+
 
 import cn.xueden.edu.wechat.utils.NotifyResult;
 import cn.xueden.edu.wechat.utils.WxPayUtil;
@@ -13,7 +12,8 @@ import cn.xueden.websocket.WebSocketServer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wechat.pay.contrib.apache.httpclient.notification.Notification;
+
+import com.wechat.pay.java.service.partnerpayments.nativepay.model.Transaction;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,9 +38,6 @@ import java.util.Map;
 public class EduPayController {
 
 
-    private final WechatConfig wechatConfig;
-
-
     private final IEduStudentBuyVipService studentBuyVipService;
 
     private final IEduStudentBuyCourseService studentBuyCourseService;
@@ -54,8 +51,7 @@ public class EduPayController {
     private final IEduWxpayService eduWxpayService;
 
 
-    public EduPayController(WechatConfig wechatConfig, IEduStudentBuyVipService studentBuyVipService, IEduStudentBuyCourseService studentBuyCourseService, IEduDealMoneyService eduDealMoneyService, IEduCourseService eduCourseService, IEduTeacherIncomeDetailsService eduTeacherIncomeDetailsService, IEduWxpayService eduWxpayService) {
-        this.wechatConfig = wechatConfig;
+    public EduPayController(IEduStudentBuyVipService studentBuyVipService, IEduStudentBuyCourseService studentBuyCourseService, IEduDealMoneyService eduDealMoneyService, IEduCourseService eduCourseService, IEduTeacherIncomeDetailsService eduTeacherIncomeDetailsService, IEduWxpayService eduWxpayService) {
         this.studentBuyVipService = studentBuyVipService;
         this.studentBuyCourseService = studentBuyCourseService;
         this.eduDealMoneyService = eduDealMoneyService;
@@ -74,14 +70,14 @@ public class EduPayController {
         // 获取微信支付信息
         EduWxpay dbWxpay =  eduWxpayService.getOne();
         // 从notification中获取解密报文
-        Notification notification = WxPayUtil.verificationAndDecryption(request,dbWxpay);
-        if(notification==null){
+        Transaction transaction = WxPayUtil.verificationAndDecryption(request,dbWxpay);
+        if(transaction==null){
             return NotifyResult.create().fail();
         }
-        String decryptData = notification.getDecryptData();
-        NotifyResource result = JSONUtil.toBean(decryptData,NotifyResource.class);
-        if("SUCCESS".equals(result.getTrade_state())){ // 支付成功
-            String Out_trade_no = result.getOut_trade_no();;
+        log.info("购买VIP返回值{}",transaction.getTradeState());
+        // 支付成功
+        if("SUCCESS".equals(transaction.getTradeState())){
+            String Out_trade_no = transaction.getOutTradeNo();;
             if(Out_trade_no!=null){
                 EduStudentBuyVip pay=studentBuyVipService.getOrderInfo(Out_trade_no);
                 if(pay!=null&&pay.getIsPayment()!=0){
@@ -127,7 +123,7 @@ public class EduPayController {
             }
 
         }
-        log.info("购买VIP会员微信支付返回处理结果："+result);
+        log.info("购买VIP会员微信支付返回处理结果："+transaction.getTradeStateDesc());
         return NotifyResult.create().success();
     }
 
@@ -140,21 +136,20 @@ public class EduPayController {
             log.info("购买课程微信支付开始返回通知");
             // 获取微信支付信息
             EduWxpay dbWxpay =  eduWxpayService.getOne();
-            // 从notification中获取解密报文
-            Notification notification = WxPayUtil.verificationAndDecryption(request,dbWxpay);
-            if(notification==null){
+            // 从transaction中获取解密报文
+            Transaction transaction = WxPayUtil.verificationAndDecryption(request,dbWxpay);
+            if(transaction==null){
                 return NotifyResult.create().fail();
             }
-            String decryptData = notification.getDecryptData();
-            NotifyResource result = JSONUtil.toBean(decryptData,NotifyResource.class);
-            if("SUCCESS".equals(result.getTrade_state())){ // 支付成功
-                String Out_trade_no = result.getOut_trade_no();
+            // 支付成功
+            if("SUCCESS".equals(transaction.getTradeState())){
+                String Out_trade_no = transaction.getOutTradeNo();
                 if(Out_trade_no!=null){
                     updateStudentBuyCourse(Out_trade_no);
                 }
 
             }
-        log.info("购买课程微信支付返回处理结果："+result);
+        log.info("购买课程微信支付返回处理结果：{}",transaction.getTradeStateDesc());
         return NotifyResult.create().success();
     }
 

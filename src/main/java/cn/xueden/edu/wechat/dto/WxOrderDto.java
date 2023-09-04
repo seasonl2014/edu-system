@@ -10,15 +10,6 @@ import lombok.Data;
  */
 @Data
 public class WxOrderDto {
-    /**
-     * 应用ID, 由微信生成的应用ID，全局唯一
-     */
-    private String appid;
-
-    /**
-     * 直连商户号
-     */
-    private String mchid;
 
     /**
      * 商品描述

@@ -1,8 +1,10 @@
 package cn.xueden.edu.wxcode.controller;
 
 import cn.xueden.edu.domain.EduStudent;
+import cn.xueden.edu.domain.EduWxCode;
 import cn.xueden.edu.service.IEduStudentService;
-import cn.xueden.edu.wxcode.WechatCodeConfig;
+import cn.xueden.edu.service.IEduWxCodeService;
+
 import cn.xueden.edu.wxcode.utils.WeChatHttpUtils;
 
 import cn.xueden.utils.IpInfo;
@@ -40,18 +42,20 @@ import java.util.Map;
 @RequestMapping("wechat")
 public class WxApiController {
 
-    private final WechatCodeConfig wechatConfig;
+    private final IEduWxCodeService eduWxCodeService;
 
     private final IEduStudentService eduStudentService;
 
-    public WxApiController(WechatCodeConfig wechatConfig, IEduStudentService eduStudentService) {
-        this.wechatConfig = wechatConfig;
+    public WxApiController(IEduWxCodeService eduWxCodeService, IEduStudentService eduStudentService) {
+        this.eduWxCodeService = eduWxCodeService;
         this.eduStudentService = eduStudentService;
     }
 
     //1、生成微信二维码
     @GetMapping("login")
     public String getWxCode() {
+        // 获取微信扫码登录配置信息
+        EduWxCode dbEduWxCode = eduWxCodeService.getOne();
         //固定地址，拼接参数
         //微信开放平台授权baseUrl  固定格式
         String baseUrl = "https://open.weixin.qq.com/connect/qrconnect" +
@@ -63,7 +67,7 @@ public class WxApiController {
                 "#wechat_redirect";
 
         //对redirect_url进行URLEncoder编码
-        String redirectUrl = wechatConfig.getRedirectUri();
+        String redirectUrl = dbEduWxCode.getRedirectUri();
 
         try {
             //对URL进行utf-8的编码
@@ -74,8 +78,8 @@ public class WxApiController {
 
         String url = String.format( //向指定字符串中按顺序替换%s
                 baseUrl,
-                wechatConfig.getAppId(),
-                wechatConfig.getRedirectUri(),
+                dbEduWxCode.getAppId(),
+                dbEduWxCode.getRedirectUri(),
                 "Xueden" //自定义（随意设置）
         );
 
@@ -92,7 +96,8 @@ public class WxApiController {
         // 获取用户IP地址
         String ipAddress = XuedenUtil.getClientIp(request);
         IpInfo ipInfo = XuedenUtil.getCityInfo(ipAddress);
-
+        // 获取微信扫码登录配置信息
+        EduWxCode dbEduWxCode = eduWxCodeService.getOne();
         //2、拿着code请求微信固定的地址，得到两个值access_token 和 openid
         String baseAccessTokenUrl =
                 "https://api.weixin.qq.com/sns/oauth2/access_token" +
@@ -103,8 +108,8 @@ public class WxApiController {
         //3、拼接三个参数：id   密钥   code值
         String accessTokenUrl = String.format(
                 baseAccessTokenUrl,
-                wechatConfig.getAppId(),
-                wechatConfig.getAppSecret(),
+                dbEduWxCode.getAppId(),
+                dbEduWxCode.getAppSecret(),
                 code
         );
         HttpGet httpGet = null;
@@ -142,7 +147,7 @@ public class WxApiController {
                 String studentToken = JWTUtil.getToken(map);
                 dbEduStudent.setStudentToken(studentToken);
                 model.addAttribute("dbEduStudent",dbEduStudent);
-                model.addAttribute("frontUrl", wechatConfig.getFrontUrl());
+                model.addAttribute("frontUrl", dbEduWxCode.getFrontUrl());
                 return "result";
             }
 
@@ -187,7 +192,7 @@ public class WxApiController {
         String studentToken = JWTUtil.getToken(wxMap);
         wxMember.setStudentToken(studentToken);
         model.addAttribute("dbEduStudent",wxMember);
-        model.addAttribute("frontUrl", wechatConfig.getFrontUrl());
+        model.addAttribute("frontUrl", dbEduWxCode.getFrontUrl());
         return "result";
     }
 }

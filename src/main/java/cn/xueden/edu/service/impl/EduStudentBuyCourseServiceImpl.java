@@ -2,10 +2,12 @@ package cn.xueden.edu.service.impl;
 
 import cn.xueden.edu.domain.EduCourse;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
+import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduCourseRepository;
 import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
+import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduStudentBuyCourseService;
-import cn.xueden.edu.wechat.config.WechatConfig;
+
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
@@ -35,14 +37,14 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
 
     private final EduCourseRepository eduCourseRepository;
 
-    private final WechatConfig wechatConfig;
+    private final EduWxpayRepository eduWxpayRepository;
 
     private final WxPayService wxPayService;
 
-    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, WechatConfig wechatConfig, WxPayService wxPayService) {
+    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService) {
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
         this.eduCourseRepository = eduCourseRepository;
-        this.wechatConfig = wechatConfig;
+        this.eduWxpayRepository = eduWxpayRepository;
         this.wxPayService = wxPayService;
     }
 
@@ -131,6 +133,9 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Object pay(String orderNo) {
+
+        // 获取微信支付配置信息
+        EduWxpay dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
         // 获取订单详情
         EduStudentBuyCourse eduStudentBuyCourse = eduStudentBuyCourseRepository.getByOrderNo(orderNo);
         // 生成付款链接
@@ -144,11 +149,9 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
         wxOrderDto.setOut_trade_no(""+orderNo+"");
 
         wxOrderDto.setDescription(eduStudentBuyCourse.getRemarks());
-        wxOrderDto.setNotify_url(wechatConfig.getNotifyCourseUrl());
-        wxOrderDto.setMchid(wechatConfig.getMchId());
-        wxOrderDto.setAppid(wechatConfig.getAppId());
+        wxOrderDto.setNotify_url(dbEduWxpay.getNotifyCourseUrl());
         try {
-            String code=wxPayService.CreateNativeOrder(wxOrderDto);
+            String code=wxPayService.CreateNativeOrder(wxOrderDto,dbEduWxpay);
             return code;
         } catch (Exception e) {
             throw new RuntimeException(e);

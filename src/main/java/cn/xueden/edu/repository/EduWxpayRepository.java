@@ -8,4 +8,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @author 梁志杰
  */
 public interface EduWxpayRepository extends JpaRepository<EduWxpay, Integer>, JpaSpecificationExecutor<EduWxpay> {
+
+    /**
+     * 获取一条记录
+     * @return
+     */
+    EduWxpay findFirstByOrderByIdDesc();
 }

@@ -1,18 +1,22 @@
 package cn.xueden.edu.wechat.service;
 
-import cn.xueden.edu.wechat.config.WechatConfig;
+import cn.xueden.edu.domain.EduWxpay;
+import cn.xueden.edu.repository.EduWxpayRepository;
+
 import cn.xueden.edu.wechat.dto.WxOrderDto;
-import cn.xueden.edu.wechat.utils.WxPayUtil;
-import com.alibaba.fastjson.JSONArray;
+
+import com.wechat.pay.java.core.Config;
+import com.wechat.pay.java.core.RSAAutoCertificateConfig;
+import com.wechat.pay.java.service.payments.nativepay.NativePayService;
+import com.wechat.pay.java.service.payments.nativepay.model.Amount;
+import com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest;
+import com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
+
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
+
 
 /**功能描述：微信支付自定义接口
  * @author:梁志杰
@@ -23,41 +27,41 @@ import java.nio.charset.Charset;
 @Component
 @Slf4j
 public class WxPayService {
-    private final WechatConfig wechatConfig;
+    private final EduWxpayRepository eduWxpayRepository;
 
-    public WxPayService(WechatConfig wechatConfig) {
-        this.wechatConfig = wechatConfig;
+    public WxPayService(EduWxpayRepository eduWxpayRepository) {
+        this.eduWxpayRepository = eduWxpayRepository;
     }
+
     /**
      * Native支付统一下单
-     * @throws Exception
      */
-    public String CreateNativeOrder(WxOrderDto wxOrderDto) throws Exception{
-        HttpPost httpPost = new HttpPost(wechatConfig.getNativeV3Api());
-        Object obj = JSONArray.toJSON(wxOrderDto);
-        String reqdata = obj.toString();
-        StringEntity entity = new StringEntity(reqdata, Charset.forName("UTF-8"));
-        entity.setContentType("application/json");
-        httpPost.setEntity(entity);
-        httpPost.setHeader("Accept", "application/json");
-        httpPost.addHeader("Content-type","application/json; charset=utf-8");
-        //完成签名并执行请求
-        CloseableHttpResponse response = WxPayUtil.getClient(wechatConfig.getMchId(),wechatConfig.getMcHserialNo(),wechatConfig.getPrivateKey(),wechatConfig.getWechatpaykey()).execute(httpPost);
-
-        try {
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == 200) { //处理成功
-                System.out.println("success,return body = " + EntityUtils.toString(response.getEntity()));
-                return EntityUtils.toString(response.getEntity());
-            } else if (statusCode == 204) { //处理成功，无返回Body
-                System.out.println("success");
-            } else {
-                System.out.println("failed,resp code = " + statusCode+ ",return body = " + EntityUtils.toString(response.getEntity()));
-                throw new IOException("request failed");
-            }
-        } finally {
-            response.close();
-        }
-        return null;
+    public String CreateNativeOrder(WxOrderDto wxOrderDto,EduWxpay dbEduWxpay) {
+        // 使用自动更新平台证书的RSA配置
+        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+        Config config =
+                new RSAAutoCertificateConfig.Builder()
+                        .merchantId(dbEduWxpay.getMerchantId())
+                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                        .apiV3Key(dbEduWxpay.getApiV3())
+                        .build();
+        // 构建service
+        NativePayService service = new NativePayService.Builder().config(config).build();
+        // request.setXxx(val)设置所需参数，具体参数可见Request定义
+        PrepayRequest request = new PrepayRequest();
+        Amount amount = new Amount();
+        amount.setTotal(wxOrderDto.getAmount().getTotal());
+        request.setAmount(amount);
+        request.setAppid(dbEduWxpay.getAppId());
+        request.setMchid(dbEduWxpay.getMerchantId());
+        request.setDescription(wxOrderDto.getDescription());
+        request.setNotifyUrl(wxOrderDto.getNotify_url());
+        request.setOutTradeNo(wxOrderDto.getOut_trade_no());
+        // 调用下单方法，得到应答
+        PrepayResponse response = service.prepay(request);
+        // 使用微信扫描 code_url 对应的二维码，即可体验Native支付
+        System.out.println(response.getCodeUrl());
+        return response.getCodeUrl();
     }
 }

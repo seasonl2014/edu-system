@@ -3,11 +3,13 @@ package cn.xueden.edu.service.impl;
 import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.domain.EduStudentBuyVip;
 import cn.xueden.edu.domain.EduVipType;
+import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduStudentBuyVipRepository;
 import cn.xueden.edu.repository.EduStudentRepository;
 import cn.xueden.edu.repository.EduVipTypeRepository;
+import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduStudentBuyVipService;
-import cn.xueden.edu.wechat.config.WechatConfig;
+
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
@@ -40,15 +42,15 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
 
     private final EduVipTypeRepository eduVipTypeRepository;
 
-    private final WechatConfig wechatConfig;
+    private final EduWxpayRepository eduWxpayRepository;
 
     private final WxPayService wxPayService;
 
-    public EduStudentBuyVipServiceImpl(EduStudentBuyVipRepository eduStudentBuyVipRepository, EduStudentRepository eduStudentRepository, EduVipTypeRepository eduVipTypeRepository, WechatConfig wechatConfig, WxPayService wxPayService) {
+    public EduStudentBuyVipServiceImpl(EduStudentBuyVipRepository eduStudentBuyVipRepository, EduStudentRepository eduStudentRepository, EduVipTypeRepository eduVipTypeRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService) {
         this.eduStudentBuyVipRepository = eduStudentBuyVipRepository;
         this.eduStudentRepository = eduStudentRepository;
         this.eduVipTypeRepository = eduVipTypeRepository;
-        this.wechatConfig = wechatConfig;
+        this.eduWxpayRepository = eduWxpayRepository;
         this.wxPayService = wxPayService;
     }
 
@@ -144,6 +146,8 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public String payBuy(String orderNo) {
+        // 获取微信支付配置信息
+        EduWxpay dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
         // 根据订单号获取订单信息
         EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipRepository.getByOrderNo(orderNo);
         if(dbEduStudentBuyVip==null){
@@ -158,13 +162,10 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
             WxOrderDto wxOrderDto = new WxOrderDto();
             wxOrderDto.setAmount(amount);
             wxOrderDto.setOut_trade_no(""+orderNo+"");
-
             wxOrderDto.setDescription("用户购买【vip全站会员】");
-            wxOrderDto.setNotify_url(wechatConfig.getNotifyVipUrl());
-            wxOrderDto.setMchid(wechatConfig.getMchId());
-            wxOrderDto.setAppid(wechatConfig.getAppId());
+            wxOrderDto.setNotify_url(dbEduWxpay.getNotifyVipUrl());
             try {
-                String code=wxPayService.CreateNativeOrder(wxOrderDto);
+                String code=wxPayService.CreateNativeOrder(wxOrderDto,dbEduWxpay);
                 return code;
             } catch (Exception e) {
                 throw new RuntimeException(e);

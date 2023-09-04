@@ -120,8 +120,8 @@
         <!--微信支付-->
         <dependency>
             <groupId>com.github.wechatpay-apiv3</groupId>
-            <artifactId>wechatpay-apache-httpclient</artifactId>
-            <version>0.4.8</version>
+            <artifactId>wechatpay-java</artifactId>
+            <version>0.2.11</version>
         </dependency>
 
         <!--微信扫码登录用到-->
