@@ -74,9 +74,9 @@ public class EduPayController {
         if(transaction==null){
             return NotifyResult.create().fail();
         }
-        log.info("购买VIP返回值{}",transaction.getTradeState());
+        log.info("购买VIP返回值{}",transaction.getTradeState().name());
         // 支付成功
-        if("SUCCESS".equals(transaction.getTradeState())){
+        if("SUCCESS".equals(transaction.getTradeState().name())){
             String Out_trade_no = transaction.getOutTradeNo();;
             if(Out_trade_no!=null){
                 EduStudentBuyVip pay=studentBuyVipService.getOrderInfo(Out_trade_no);
@@ -142,7 +142,7 @@ public class EduPayController {
                 return NotifyResult.create().fail();
             }
             // 支付成功
-            if("SUCCESS".equals(transaction.getTradeState())){
+            if("SUCCESS".equals(transaction.getTradeState().name())){
                 String Out_trade_no = transaction.getOutTradeNo();
                 if(Out_trade_no!=null){
                     updateStudentBuyCourse(Out_trade_no);

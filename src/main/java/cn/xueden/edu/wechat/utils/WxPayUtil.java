@@ -81,7 +81,7 @@ public class WxPayUtil {
         // 没有的话，则构造一个
         NotificationConfig config = new RSAAutoCertificateConfig.Builder()
                 .merchantId(dbWxpay.getMerchantId())
-                .privateKeyFromPath(dbWxpay.getMerchantPrivatekey())
+                .privateKey(dbWxpay.getMerchantPrivatekey())
                 .merchantSerialNumber(dbWxpay.getMerchantSerialnumber())
                 .apiV3Key(dbWxpay.getApiV3())
                 .build();
