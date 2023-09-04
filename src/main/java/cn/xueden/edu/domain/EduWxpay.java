@@ -49,9 +49,4 @@ public class EduWxpay extends BaseEntity {
     @Column
     private String notifyCourseUrl;
 
-    /**
-     * native支付请求接口
-     */
-    @Column
-    private String nativeV3Api;
 }

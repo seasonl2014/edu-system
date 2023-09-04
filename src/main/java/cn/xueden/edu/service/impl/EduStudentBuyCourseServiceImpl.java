@@ -1,6 +1,7 @@
 package cn.xueden.edu.service.impl;
 
 import cn.xueden.edu.domain.EduCourse;
+import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduCourseRepository;
@@ -8,15 +9,16 @@ import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
 import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduStudentBuyCourseService;
 
+import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
 import cn.xueden.exception.BadRequestException;
 
-import cn.xueden.utils.IpInfo;
-import cn.xueden.utils.JWTUtil;
-import cn.xueden.utils.XuedenUtil;
+import cn.xueden.utils.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,5 +179,17 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
     @Override
     public EduStudentBuyCourse findByCourseIdAndStudentId(Long courseId, Long studentId) {
         return eduStudentBuyCourseRepository.findByCourseIdAndStudentId(courseId,studentId);
+    }
+
+    /**
+     * 获取课程订单明细列表数据
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object getList(EduOrderCourseQueryCriteria queryCriteria,Pageable pageable) {
+        Page<EduStudentBuyCourse> page = eduStudentBuyCourseRepository.findAll((root, query, criteriaBuilder)->
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+        return PageUtil.toPage(page);
     }
 }

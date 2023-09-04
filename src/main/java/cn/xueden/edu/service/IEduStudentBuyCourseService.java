@@ -1,6 +1,8 @@
 package cn.xueden.edu.service;
 
 import cn.xueden.edu.domain.EduStudentBuyCourse;
+import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
+import org.springframework.data.domain.Pageable;
 
 /**功能描述：学员购买课程业务接口
  * @author:梁志杰
@@ -46,4 +48,11 @@ public interface IEduStudentBuyCourseService {
      * @return
      */
     EduStudentBuyCourse findByCourseIdAndStudentId(Long courseId, Long studentId);
+
+    /**
+     * 获取课程订单明细列表数据
+     * @param pageable
+     * @return
+     */
+    Object getList(EduOrderCourseQueryCriteria queryCriteria,Pageable pageable);
 }
