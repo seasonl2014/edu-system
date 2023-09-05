@@ -2,6 +2,8 @@ package cn.xueden.edu.service;
 
 import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
+import cn.xueden.edu.vo.RefundOrderCourseModel;
+import cn.xueden.edu.vo.StudentBuyCourseModel;
 import org.springframework.data.domain.Pageable;
 
 /**功能描述：学员购买课程业务接口
@@ -55,4 +57,16 @@ public interface IEduStudentBuyCourseService {
      * @return
      */
     Object getList(EduOrderCourseQueryCriteria queryCriteria,Pageable pageable);
+
+    /**
+     * 根据id获取课程订单详情信息
+     * @return
+     */
+    StudentBuyCourseModel getById(Long id);
+
+    /**
+     * 课程订单退款
+     * @param refundOrderCourseModel
+     */
+    void refundCourseOrder(RefundOrderCourseModel refundOrderCourseModel);
 }

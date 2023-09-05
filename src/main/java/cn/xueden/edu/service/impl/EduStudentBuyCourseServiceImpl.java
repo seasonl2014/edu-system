@@ -6,10 +6,13 @@ import cn.xueden.edu.domain.EduStudentBuyCourse;
 import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduCourseRepository;
 import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
+import cn.xueden.edu.repository.EduStudentRepository;
 import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduStudentBuyCourseService;
 
 import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
+import cn.xueden.edu.vo.RefundOrderCourseModel;
+import cn.xueden.edu.vo.StudentBuyCourseModel;
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
@@ -17,6 +20,7 @@ import cn.xueden.exception.BadRequestException;
 
 import cn.xueden.utils.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.wechat.pay.java.service.refund.model.Refund;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,11 +47,14 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
 
     private final WxPayService wxPayService;
 
-    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService) {
+    private final EduStudentRepository eduStudentRepository;
+
+    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService, EduStudentRepository eduStudentRepository) {
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
         this.eduCourseRepository = eduCourseRepository;
         this.eduWxpayRepository = eduWxpayRepository;
         this.wxPayService = wxPayService;
+        this.eduStudentRepository = eduStudentRepository;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -191,5 +198,79 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
         Page<EduStudentBuyCourse> page = eduStudentBuyCourseRepository.findAll((root, query, criteriaBuilder)->
                 QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page);
+    }
+
+    /**
+     * 根据id获取课程订单详情信息
+     * @return
+     */
+    @Override
+    public StudentBuyCourseModel getById(Long id) {
+        StudentBuyCourseModel tempStudentBuyCourseModel = new StudentBuyCourseModel();
+        // 课程订单详情
+        EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseRepository.getReferenceById(id);
+        // 课程详情
+        EduCourse dbEduCourse = eduCourseRepository.getReferenceById(dbEduStudentBuyCourse.getCourseId());
+        // 购买者详情
+        EduStudent dbEduStudent = eduStudentRepository.getReferenceById(dbEduStudentBuyCourse.getStudentId());
+
+        // 订单ID
+        tempStudentBuyCourseModel.setOrderId(dbEduStudentBuyCourse.getId());
+        // 订单编号
+        tempStudentBuyCourseModel.setOrderNo(dbEduStudentBuyCourse.getOrderNo());
+        // 订单金额
+        tempStudentBuyCourseModel.setPrice(dbEduStudentBuyCourse.getPrice());
+        // 下单时间
+        tempStudentBuyCourseModel.setCreateTime(dbEduStudentBuyCourse.getCreateTime());
+        // 省份
+        tempStudentBuyCourseModel.setProvince(dbEduStudentBuyCourse.getProvince());
+        // 城市
+        tempStudentBuyCourseModel.setCity(dbEduStudentBuyCourse.getCity());
+        // 课程名称
+        tempStudentBuyCourseModel.setCourseName(dbEduCourse.getTitle());
+        // 课程原价
+        tempStudentBuyCourseModel.setOriginalPrice(dbEduCourse.getOriginalPrice());
+        // 学员编号
+        tempStudentBuyCourseModel.setStudentNo(dbEduStudent.getStuNo());
+        return tempStudentBuyCourseModel;
+    }
+
+    /**
+     * 课程订单退款
+     * @param refundOrderCourseModel
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void refundCourseOrder(RefundOrderCourseModel refundOrderCourseModel) {
+        // 获取微信支付配置信息
+        EduWxpay dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+        // 课程订单详情
+        EduStudentBuyCourse dbEduStudentBuyCourse = eduStudentBuyCourseRepository.getReferenceById(refundOrderCourseModel.getOrderId());
+
+        // 退款比例
+        BigDecimal bigDecimal = new BigDecimal(0.85);
+        // 转换成分
+        BigDecimal bigDecimal1 = new BigDecimal(100);
+        // 退款金额 转换成分
+        BigDecimal price = dbEduStudentBuyCourse.getPrice().multiply(bigDecimal).multiply(bigDecimal1);
+        // 原订单金额 ，转化成分
+        BigDecimal oldPrice = dbEduStudentBuyCourse.getPrice().multiply(bigDecimal1);
+        // 调用微信退款接口
+        Refund refund = wxPayService.refundOrder(dbEduWxpay,dbEduStudentBuyCourse.getOrderNo(),refundOrderCourseModel.getRemarks(),price,oldPrice);
+        if(refund==null){
+            throw new BadRequestException("退款失败！");
+        }else {
+            // 修改课程订单状态,2表示已退款
+            dbEduStudentBuyCourse.setIsPayment(2);
+            eduStudentBuyCourseRepository.save(dbEduStudentBuyCourse);
+            // 退款并封禁学员
+            if(refundOrderCourseModel.getType()>0){
+
+             // 退款
+            }else {
+
+            }
+        }
+
     }
 }
