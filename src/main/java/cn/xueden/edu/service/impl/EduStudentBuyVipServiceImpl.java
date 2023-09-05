@@ -1,30 +1,31 @@
 package cn.xueden.edu.service.impl;
 
-import cn.xueden.edu.domain.EduStudent;
-import cn.xueden.edu.domain.EduStudentBuyVip;
-import cn.xueden.edu.domain.EduVipType;
-import cn.xueden.edu.domain.EduWxpay;
+import cn.xueden.edu.domain.*;
 import cn.xueden.edu.repository.EduStudentBuyVipRepository;
 import cn.xueden.edu.repository.EduStudentRepository;
 import cn.xueden.edu.repository.EduVipTypeRepository;
 import cn.xueden.edu.repository.EduWxpayRepository;
 import cn.xueden.edu.service.IEduStudentBuyVipService;
 
+import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
+import cn.xueden.edu.vo.RefundOrderCourseModel;
+import cn.xueden.edu.vo.StudentBuyVipModel;
 import cn.xueden.edu.wechat.dto.AmountDto;
 import cn.xueden.edu.wechat.dto.WxOrderDto;
 import cn.xueden.edu.wechat.service.WxPayService;
 import cn.xueden.exception.BadRequestException;
 
-import cn.xueden.utils.IpInfo;
-import cn.xueden.utils.JWTUtil;
-import cn.xueden.utils.XuedenUtil;
+import cn.xueden.utils.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.wechat.pay.java.service.refund.model.Refund;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
+
 
 /**功能描述：学员购买VIP业务接口实现类
  * @author:梁志杰
@@ -189,5 +190,89 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
         return eduStudentBuyVipRepository.findByStudentId(studentId);
     }
 
+    /**
+     * 获取VIP订单列表数据
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object getList(EduOrderCourseQueryCriteria queryCriteria, Pageable pageable) {
+        Page<EduStudentBuyVip> page = eduStudentBuyVipRepository.findAll((root, query, criteriaBuilder)->
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+        return PageUtil.toPage(page);
+    }
 
+    /**
+     * 根据id获取VIP订单详情信息
+     * @param id
+     * @return
+     */
+    @Override
+    public StudentBuyVipModel getById(Long id) {
+        StudentBuyVipModel tempStudentBuyVipModel = new StudentBuyVipModel();
+        // 根据ID获取VIP订单详情信息
+        EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipRepository.getReferenceById(id);
+        // 下单时间
+        tempStudentBuyVipModel.setCreateTime(dbEduStudentBuyVip.getCreateTime());
+        // 订单ID
+        tempStudentBuyVipModel.setOrderId(dbEduStudentBuyVip.getId());
+        // 订单编号
+        tempStudentBuyVipModel.setOrderNo(dbEduStudentBuyVip.getOrderNo());
+        // 订单金额
+        tempStudentBuyVipModel.setPrice(dbEduStudentBuyVip.getPrice());
+        // 省份
+        tempStudentBuyVipModel.setProvince(dbEduStudentBuyVip.getProvince());
+        // 城市
+        tempStudentBuyVipModel.setCity(dbEduStudentBuyVip.getCity());
+        // 学员编号
+        EduStudent dbEduStudent = eduStudentRepository.getReferenceById(dbEduStudentBuyVip.getStudentId());
+        tempStudentBuyVipModel.setStudentNo(dbEduStudent.getStuNo());
+        // VIP名称
+        EduVipType dbEduVipType = eduVipTypeRepository.getReferenceById(dbEduStudentBuyVip.getVipId());
+        tempStudentBuyVipModel.setVipName(dbEduVipType.getVipName());
+        // VIP价格
+        tempStudentBuyVipModel.setVipPrice(dbEduVipType.getVipMoney());
+        return tempStudentBuyVipModel;
+    }
+
+    /**
+     * VIP订单退款
+     * @param refundOrderCourseModel
+     */
+    @Override
+    public void refundVipOrder(RefundOrderCourseModel refundOrderCourseModel) {
+        // 获取微信支付配置信息
+        EduWxpay dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+        // 课程订单详情
+        EduStudentBuyVip dbEduStudentBuyVip = eduStudentBuyVipRepository.getReferenceById(refundOrderCourseModel.getOrderId());
+
+        // 退款比例
+        BigDecimal bigDecimal = new BigDecimal(0.85);
+        // 转换成分
+        BigDecimal bigDecimal1 = new BigDecimal(100);
+        // 退款金额 转换成分
+        BigDecimal price = dbEduStudentBuyVip.getPrice().multiply(bigDecimal).multiply(bigDecimal1);
+        // 原订单金额 ，转化成分
+        BigDecimal oldPrice = dbEduStudentBuyVip.getPrice().multiply(bigDecimal1);
+        // 调用微信退款接口
+        Refund refund = wxPayService.refundOrder(dbEduWxpay,dbEduStudentBuyVip.getOrderNo(),refundOrderCourseModel.getRemarks(),price,oldPrice);
+        if(refund==null){
+            throw new BadRequestException("退款失败！");
+        }else {
+            // 修改课程订单状态,2表示已退款
+            dbEduStudentBuyVip.setIsPayment(2);
+            eduStudentBuyVipRepository.save(dbEduStudentBuyVip);
+            // 退款并封禁学员
+            if(refundOrderCourseModel.getType()>0){
+                EduStudent dbEduStudent = eduStudentRepository.getReferenceById(dbEduStudentBuyVip.getStudentId());
+                dbEduStudent.setStatus(0);
+                eduStudentRepository.save(dbEduStudent);
+            }
+
+            // 保存数据到退款记录表
+
+        }
+
+    }
 }

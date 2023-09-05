@@ -265,11 +265,11 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
             eduStudentBuyCourseRepository.save(dbEduStudentBuyCourse);
             // 退款并封禁学员
             if(refundOrderCourseModel.getType()>0){
-
-             // 退款
-            }else {
-
+                EduStudent dbEduStudent = eduStudentRepository.getReferenceById(dbEduStudentBuyCourse.getStudentId());
+                dbEduStudent.setStatus(0);
+                eduStudentRepository.save(dbEduStudent);
             }
+            // 保存数据到退款记录表
         }
 
     }

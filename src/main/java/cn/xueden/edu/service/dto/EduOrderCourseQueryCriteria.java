@@ -17,4 +17,10 @@ public class EduOrderCourseQueryCriteria {
      */
     @EnableXuedenQuery(blurry = "orderNo")
     private String orderNo;
+
+    /**
+     * 订单状态
+     */
+    @EnableXuedenQuery
+    private Integer isPayment;
 }

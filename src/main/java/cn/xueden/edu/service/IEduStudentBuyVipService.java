@@ -1,6 +1,10 @@
 package cn.xueden.edu.service;
 
 import cn.xueden.edu.domain.EduStudentBuyVip;
+import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
+import cn.xueden.edu.vo.RefundOrderCourseModel;
+import cn.xueden.edu.vo.StudentBuyVipModel;
+import org.springframework.data.domain.Pageable;
 
 /**功能描述：学员购买VIP业务接口
  * @author:梁志杰
@@ -46,4 +50,24 @@ public interface IEduStudentBuyVipService {
     EduStudentBuyVip findByStudentId(Long studentId);
 
 
+    /**
+     * 获取VIP列表数据
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    Object getList(EduOrderCourseQueryCriteria queryCriteria, Pageable pageable);
+
+    /**
+     * 根据id获取VIP订单详情信息
+     * @param id
+     * @return
+     */
+    StudentBuyVipModel getById(Long id);
+
+    /**
+     * VIP订单退款
+     * @param refundOrderCourseModel
+     */
+    void refundVipOrder(RefundOrderCourseModel refundOrderCourseModel);
 }
