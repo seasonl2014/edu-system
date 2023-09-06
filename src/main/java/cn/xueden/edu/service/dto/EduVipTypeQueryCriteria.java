@@ -1,5 +1,6 @@
 package cn.xueden.edu.service.dto;
 
+import cn.xueden.annotation.EnableXuedenQuery;
 import lombok.Data;
 
 /**功能描述：VIP类别查询条件类
@@ -10,4 +11,10 @@ import lombok.Data;
  */
 @Data
 public class EduVipTypeQueryCriteria {
+
+    /**
+     * 关键字搜索，VIP名称查询
+     */
+    @EnableXuedenQuery(blurry = "vipName")
+    private String searchValue;
 }

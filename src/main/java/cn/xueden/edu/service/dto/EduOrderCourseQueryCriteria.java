@@ -23,4 +23,10 @@ public class EduOrderCourseQueryCriteria {
      */
     @EnableXuedenQuery
     private Integer isPayment;
+
+    /**
+     * VIPID
+     */
+    @EnableXuedenQuery
+    private Long vipId;
 }

@@ -39,5 +39,5 @@ public class EduVipType extends BaseEntity {
      * 加入人数
      */
     @Column(name = "nums",nullable = false)
-    private Integer nums;
+    private Long nums;
 }

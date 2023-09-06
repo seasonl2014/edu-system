@@ -3,12 +3,16 @@ package cn.xueden.edu.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.xueden.edu.domain.EduStudentBuyVip;
 import cn.xueden.edu.domain.EduVipType;
+import cn.xueden.edu.repository.EduStudentBuyVipRepository;
+import cn.xueden.edu.repository.EduStudentRepository;
 import cn.xueden.edu.repository.EduVipTypeRepository;
 import cn.xueden.edu.service.IEduVipTypeService;
 import cn.xueden.edu.service.dto.EduVipTypeQueryCriteria;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,8 +32,11 @@ public class EduVipTypeServiceImpl implements IEduVipTypeService {
 
     private final EduVipTypeRepository eduVipTypeRepository;
 
-    public EduVipTypeServiceImpl(EduVipTypeRepository eduVipTypeRepository) {
+    private final EduStudentBuyVipRepository eduStudentBuyVipRepository;
+
+    public EduVipTypeServiceImpl(EduVipTypeRepository eduVipTypeRepository, EduStudentBuyVipRepository eduStudentBuyVipRepository) {
         this.eduVipTypeRepository = eduVipTypeRepository;
+        this.eduStudentBuyVipRepository = eduStudentBuyVipRepository;
     }
 
     /**
@@ -41,14 +48,26 @@ public class EduVipTypeServiceImpl implements IEduVipTypeService {
     @Override
     public Object getList(EduVipTypeQueryCriteria queryCriteria, Pageable pageable) {
         Page<EduVipType> page = eduVipTypeRepository.findAll((root, query, criteriaBuilder)->
-                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),
+                pageable);
+
+        for (EduVipType vipType:page.getContent()){
+            // 统计会员人数
+            EduStudentBuyVip searchEduStudentBuyVip = new EduStudentBuyVip();
+            searchEduStudentBuyVip.setVipId(vipType.getId());
+            searchEduStudentBuyVip.setIsPayment(1);
+            Example<EduStudentBuyVip> example = Example.of(searchEduStudentBuyVip);
+            Long count = eduStudentBuyVipRepository.count(example);
+            vipType.setNums(count);
+        }
+
         return PageUtil.toPage(page);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addEduVipType(EduVipType eduVipType) {
-        eduVipType.setNums(0);
+        eduVipType.setNums(0L);
         eduVipTypeRepository.save(eduVipType);
     }
 
