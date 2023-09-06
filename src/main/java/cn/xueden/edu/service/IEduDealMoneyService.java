@@ -1,6 +1,8 @@
 package cn.xueden.edu.service;
 
 import cn.xueden.edu.domain.EduDealMoney;
+import cn.xueden.edu.service.dto.EduDealMoneyQueryCriteria;
+import org.springframework.data.domain.Pageable;
 
 /**功能描述：成交金额汇总业务接口
  * @author:梁志杰
@@ -10,7 +12,7 @@ import cn.xueden.edu.domain.EduDealMoney;
  */
 public interface IEduDealMoneyService {
     /**
-     * 根据订单编号获取成绩金额汇总数据
+     * 根据订单编号获取金额汇总数据
      * @param out_trade_no
      * @return
      */
@@ -21,4 +23,12 @@ public interface IEduDealMoneyService {
      * @param eduDealMoney
      */
     void save(EduDealMoney eduDealMoney);
+
+    /**
+     * 获取成交金额列表数据
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    Object getList(EduDealMoneyQueryCriteria queryCriteria, Pageable pageable);
 }

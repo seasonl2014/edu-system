@@ -1,8 +1,14 @@
 package cn.xueden.edu.service.impl;
 
 import cn.xueden.edu.domain.EduDealMoney;
+import cn.xueden.edu.domain.EduStudent;
 import cn.xueden.edu.repository.EduDealMoneyRepository;
 import cn.xueden.edu.service.IEduDealMoneyService;
+import cn.xueden.edu.service.dto.EduDealMoneyQueryCriteria;
+import cn.xueden.utils.PageUtil;
+import cn.xueden.utils.QueryHelp;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,5 +46,18 @@ public class EduDealMoneyServiceImpl implements IEduDealMoneyService {
     @Override
     public void save(EduDealMoney eduDealMoney) {
         eduDealMoneyRepository.save(eduDealMoney);
+    }
+
+    /**
+     * 获取成交金额列表数据
+     * @param queryCriteria
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object getList(EduDealMoneyQueryCriteria queryCriteria, Pageable pageable) {
+        Page<EduDealMoney> page = eduDealMoneyRepository.findAll((root, query, criteriaBuilder)->
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+        return PageUtil.toPage(page);
     }
 }

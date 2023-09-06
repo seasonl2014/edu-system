@@ -1,5 +1,11 @@
 server:
   port: 8081
+  tomcat:
+    connection-timeout: 36000000
+    max-swallow-size: 500MB
+    max-http-form-post-size: 500MB
+    background-processor-delay: 36000000
+    keep-alive-timeout: 36000000
 # ?????
 spring:
   servlet:
@@ -38,7 +44,4 @@ user:
   icon: E:\\edu-mangement-system\\
 file:
   path: D:\\upload2\\
-# ip2region
-ip2region:
-  enabled: true
-  dbfile: data/ip2region.db
+

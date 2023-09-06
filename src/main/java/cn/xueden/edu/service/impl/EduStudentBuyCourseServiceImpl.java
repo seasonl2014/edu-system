@@ -1,13 +1,7 @@
 package cn.xueden.edu.service.impl;
 
-import cn.xueden.edu.domain.EduCourse;
-import cn.xueden.edu.domain.EduStudent;
-import cn.xueden.edu.domain.EduStudentBuyCourse;
-import cn.xueden.edu.domain.EduWxpay;
-import cn.xueden.edu.repository.EduCourseRepository;
-import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
-import cn.xueden.edu.repository.EduStudentRepository;
-import cn.xueden.edu.repository.EduWxpayRepository;
+import cn.xueden.edu.domain.*;
+import cn.xueden.edu.repository.*;
 import cn.xueden.edu.service.IEduStudentBuyCourseService;
 
 import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
@@ -49,12 +43,15 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
 
     private final EduStudentRepository eduStudentRepository;
 
-    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService, EduStudentRepository eduStudentRepository) {
+    private final EduRefundRepository eduRefundRepository;
+
+    public EduStudentBuyCourseServiceImpl(EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService, EduStudentRepository eduStudentRepository, EduRefundRepository eduRefundRepository) {
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
         this.eduCourseRepository = eduCourseRepository;
         this.eduWxpayRepository = eduWxpayRepository;
         this.wxPayService = wxPayService;
         this.eduStudentRepository = eduStudentRepository;
+        this.eduRefundRepository = eduRefundRepository;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -270,6 +267,15 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
                 eduStudentRepository.save(dbEduStudent);
             }
             // 保存数据到退款记录表
+            EduRefund tempEduRefund = new EduRefund();
+            tempEduRefund.setRefundId(refund.getRefundId());
+            tempEduRefund.setOutRefundNo(refund.getOutRefundNo());
+            tempEduRefund.setOutTradeNo(refund.getOutTradeNo());
+            tempEduRefund.setTransactionId(refund.getTransactionId());
+            tempEduRefund.setRefundType(0);
+            tempEduRefund.setRefundTotal(refund.getAmount().getRefund());
+            tempEduRefund.setStudentId(dbEduStudentBuyCourse.getStudentId());
+            eduRefundRepository.save(tempEduRefund);
         }
 
     }

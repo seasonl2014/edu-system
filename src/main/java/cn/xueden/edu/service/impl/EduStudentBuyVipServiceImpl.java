@@ -1,10 +1,7 @@
 package cn.xueden.edu.service.impl;
 
 import cn.xueden.edu.domain.*;
-import cn.xueden.edu.repository.EduStudentBuyVipRepository;
-import cn.xueden.edu.repository.EduStudentRepository;
-import cn.xueden.edu.repository.EduVipTypeRepository;
-import cn.xueden.edu.repository.EduWxpayRepository;
+import cn.xueden.edu.repository.*;
 import cn.xueden.edu.service.IEduStudentBuyVipService;
 
 import cn.xueden.edu.service.dto.EduOrderCourseQueryCriteria;
@@ -47,12 +44,15 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
 
     private final WxPayService wxPayService;
 
-    public EduStudentBuyVipServiceImpl(EduStudentBuyVipRepository eduStudentBuyVipRepository, EduStudentRepository eduStudentRepository, EduVipTypeRepository eduVipTypeRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService) {
+    private final EduRefundRepository eduRefundRepository;
+
+    public EduStudentBuyVipServiceImpl(EduStudentBuyVipRepository eduStudentBuyVipRepository, EduStudentRepository eduStudentRepository, EduVipTypeRepository eduVipTypeRepository, EduWxpayRepository eduWxpayRepository, WxPayService wxPayService, EduRefundRepository eduRefundRepository) {
         this.eduStudentBuyVipRepository = eduStudentBuyVipRepository;
         this.eduStudentRepository = eduStudentRepository;
         this.eduVipTypeRepository = eduVipTypeRepository;
         this.eduWxpayRepository = eduWxpayRepository;
         this.wxPayService = wxPayService;
+        this.eduRefundRepository = eduRefundRepository;
     }
 
     /**
@@ -271,6 +271,15 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
             }
 
             // 保存数据到退款记录表
+            EduRefund tempEduRefund = new EduRefund();
+            tempEduRefund.setRefundId(refund.getRefundId());
+            tempEduRefund.setOutRefundNo(refund.getOutRefundNo());
+            tempEduRefund.setOutTradeNo(refund.getOutTradeNo());
+            tempEduRefund.setTransactionId(refund.getTransactionId());
+            tempEduRefund.setRefundType(1);
+            tempEduRefund.setRefundTotal(refund.getAmount().getRefund());
+            tempEduRefund.setStudentId(dbEduStudentBuyVip.getStudentId());
+            eduRefundRepository.save(tempEduRefund);
 
         }
 
