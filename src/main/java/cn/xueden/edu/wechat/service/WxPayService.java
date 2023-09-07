@@ -204,8 +204,8 @@ public class WxPayService {
         StockRule stockRule = new StockRule();
         // 发放总上限
         stockRule.setMaxCoupons(eduCoupon.getMaxCoupons());
-        // 总预算 说明：总消耗金额，单位分
-        stockRule.setMaxAmount(100*100L);
+        // 总预算 批次预算等于批次面额乘以发券数 说明：总消耗金额，单位分
+        stockRule.setMaxAmount(eduCoupon.getCouponAmount()*eduCoupon.getMaxCoupons()*100);
         // 是否开启自然人限制
         stockRule.setNaturalPersonLimit(false);
         // api发券防刷
@@ -233,7 +233,30 @@ public class WxPayService {
         request.setCouponUseRule(couponRule);
         // 核销规则 ---结束
 
-        return cashCouponsService.createCouponStock(request);
+        try {
+            CreateCouponStockResponse response = cashCouponsService.createCouponStock(request);
+            log.info("创建指定批次的代金券返回结果{}",response);
+
+            // 查询代金券消息通知地址
+            Callback callback = queryCallback(dbEduWxpay);
+            if(callback==null){
+                // 设置代金券消息通知地址
+                setCallback(true,dbEduWxpay);
+            }
+
+            return response;
+        } catch (HttpException e) { // 发送HTTP请求失败
+            // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
+            log.info("发送HTTP请求失败",e.getMessage());
+        } catch (ServiceException e) { // 服务返回状态小于200或大于等于300，例如500
+            // 调用e.getResponseBody()获取返回体打印日志或上报监控，更多方法见ServiceException定义
+            log.info("服务返回状态小于200或大于等于300",e.getResponseBody());
+        } catch (MalformedMessageException e) { // 服务返回成功，返回体类型不合法，或者解析返回体失败
+            // 调用e.getMessage()获取信息打印日志或上报监控，更多方法见MalformedMessageException定义
+            log.info("返回体类型不合法，或者解析返回体失败",e.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -312,6 +335,12 @@ public class WxPayService {
             request.setStockId(eduCoupon.getStockId());
             StartStockResponse response = cashCouponsService.startStock(request);
             log.info("激活开启指定批次批次返回信息{}",response);
+            // 查询代金券消息通知地址
+            Callback callback = queryCallback(dbEduWxpay);
+            if(callback==null){
+                // 设置代金券消息通知地址
+                setCallback(true,dbEduWxpay);
+            }
             return response;
         } catch (HttpException e) { // 发送HTTP请求失败
             // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
@@ -327,10 +356,96 @@ public class WxPayService {
         return null;
     }
 
-    /** 查询批次详情 */
-    public static Stock queryStock() {
+    /**
+     * 查询批次详情
+     * */
+    public  Stock queryStock(EduCouponStock eduCoupon,
+                             EduWxpay dbEduWxpay) {
+        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+        Config config =
+                new RSAAutoCertificateConfig.Builder()
+                        .merchantId(dbEduWxpay.getMerchantId())
+                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                        .apiV3Key(dbEduWxpay.getApiV3())
+                        .build();
+        // 初始化服务
+        cashCouponsService = new CashCouponsService.Builder().config(config).build();
         QueryStockRequest request = new QueryStockRequest();
-        return cashCouponsService.queryStock(request);
+        try {
+            // 批次号 说明：批次id
+            request.setStockId(eduCoupon.getStockId());
+            // 创建批次的商户号 说明：批次创建时的商户号
+            request.setStockCreatorMchid(dbEduWxpay.getMerchantId());
+
+            Stock response = cashCouponsService.queryStock(request);
+            log.info("查询指定批次批次返回信息{}",response);
+            return response;
+        } catch (HttpException e) { // 发送HTTP请求失败
+            // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
+            log.info("发送HTTP请求失败",e);
+        } catch (ServiceException e) { // 服务返回状态小于200或大于等于300，例如500
+            // 调用e.getResponseBody()获取返回体打印日志或上报监控，更多方法见ServiceException定义
+            log.info("服务返回状态小于200或大于等于300",e);
+        } catch (MalformedMessageException e) { // 服务返回成功，返回体类型不合法，或者解析返回体失败
+            // 调用e.getMessage()获取信息打印日志或上报监控，更多方法见MalformedMessageException定义
+            log.info("返回体类型不合法，或者解析返回体失败",e);
+        }
+       return null;
+    }
+
+    /**
+     * 查询代金券消息通知地址
+     * */
+    public  Callback queryCallback(EduWxpay dbEduWxpay) {
+
+        QueryCallbackRequest request = new QueryCallbackRequest();
+        try {
+            request.setMchid(dbEduWxpay.getMerchantId());
+            Callback response = cashCouponsService.queryCallback(request);
+            log.info("查询代金券消息通知地址返回信息{}",response);
+            return response;
+        } catch (HttpException e) { // 发送HTTP请求失败
+            // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
+            log.info("发送HTTP请求失败",e);
+        } catch (ServiceException e) { // 服务返回状态小于200或大于等于300，例如500
+            // 调用e.getResponseBody()获取返回体打印日志或上报监控，更多方法见ServiceException定义
+            log.info("服务返回状态小于200或大于等于300",e);
+        } catch (MalformedMessageException e) { // 服务返回成功，返回体类型不合法，或者解析返回体失败
+            // 调用e.getMessage()获取信息打印日志或上报监控，更多方法见MalformedMessageException定义
+            log.info("返回体类型不合法，或者解析返回体失败",e);
+        }
+        return null;
+
+    }
+
+    /** 设置代金券消息通知地址 */
+    public static SetCallbackResponse setCallback(Boolean _switch,
+                                                  EduWxpay dbEduWxpay) {
+        SetCallbackRequest request = new SetCallbackRequest();
+        try {
+            // 回调开关 说明：true-开启推送；false-停止推送
+            request.setSwitch(_switch);
+            // 通知url地址 说明：支付通知商户url地址
+            //request.setNotifyUrl("https://xueden.natapp4.cc/edu/coupon/callback");
+            request.setNotifyUrl(dbEduWxpay.getNotifyCouponUrl());
+            // 商户号
+            request.setMchid(dbEduWxpay.getMerchantId());
+            SetCallbackResponse response = cashCouponsService.setCallback(request);
+            log.info("设置代金券消息通知地址返回信息{}",response);
+            return response;
+        } catch (HttpException e) { // 发送HTTP请求失败
+            // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
+            log.info("发送HTTP请求失败",e);
+        } catch (ServiceException e) { // 服务返回状态小于200或大于等于300，例如500
+            // 调用e.getResponseBody()获取返回体打印日志或上报监控，更多方法见ServiceException定义
+            log.info("服务返回状态小于200或大于等于300",e);
+        } catch (MalformedMessageException e) { // 服务返回成功，返回体类型不合法，或者解析返回体失败
+            // 调用e.getMessage()获取信息打印日志或上报监控，更多方法见MalformedMessageException定义
+            log.info("返回体类型不合法，或者解析返回体失败",e);
+        }
+        return null;
+
     }
 
 }

@@ -25,7 +25,7 @@ spring:
       connection-test-query: Select 1
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
 
   mail:

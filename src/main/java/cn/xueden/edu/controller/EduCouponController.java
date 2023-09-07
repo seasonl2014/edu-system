@@ -3,7 +3,7 @@ package cn.xueden.edu.controller;
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
 import cn.xueden.edu.domain.EduCouponStock;
-import cn.xueden.edu.service.IEduCouponService;
+import cn.xueden.edu.service.IEduCouponStockService;
 import cn.xueden.edu.service.dto.EduCouponQueryCriteria;
 
 import cn.xueden.utils.PageVo;
@@ -24,9 +24,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("coupon")
 public class EduCouponController {
 
-    private final IEduCouponService eduCouponService;
+    private final IEduCouponStockService eduCouponService;
 
-    public EduCouponController(IEduCouponService eduCouponService) {
+    public EduCouponController(IEduCouponStockService eduCouponService) {
         this.eduCouponService = eduCouponService;
     }
 
@@ -65,6 +65,13 @@ public class EduCouponController {
     public BaseResult startStock(@PathVariable Long couponId){
         eduCouponService.startStock(couponId);
         return BaseResult.success("ID为"+couponId+"的代金券批次启动成功");
+    }
+
+    @EnableSysLog("【后台】查询指定批次详情")
+    @GetMapping("stock/query/{couponId}")
+    public BaseResult queryStock(@PathVariable Long couponId){
+        eduCouponService.queryStock(couponId);
+        return BaseResult.success("ID为"+couponId+"的代金券查询成功");
     }
 
 

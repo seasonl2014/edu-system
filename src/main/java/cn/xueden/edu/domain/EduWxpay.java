@@ -49,4 +49,10 @@ public class EduWxpay extends BaseEntity {
     @Column
     private String notifyCourseUrl;
 
+    /**
+     * 代金券核销回调通知
+     */
+    @Column
+    private String notifyCouponUrl;
+
 }

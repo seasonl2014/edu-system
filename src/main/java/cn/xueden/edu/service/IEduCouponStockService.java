@@ -4,13 +4,13 @@ import cn.xueden.edu.domain.EduCouponStock;
 import cn.xueden.edu.service.dto.EduCouponQueryCriteria;
 import org.springframework.data.domain.Pageable;
 
-/**功能描述：代金券业务接口
+/**功能描述：代金券批次业务接口
  * @author:梁志杰
  * @date:2023/9/6
  * @description:cn.xueden.edu.service
  * @version:1.0
  */
-public interface IEduCouponService {
+public interface IEduCouponStockService {
     /**
      * 创建代金券批次
      * @param eduCoupon
@@ -43,4 +43,10 @@ public interface IEduCouponService {
      * @param couponId
      */
     void startStock(Long couponId);
+
+    /**
+     * 查询指定批次详情
+     * @param couponId
+     */
+    void queryStock(Long couponId);
 }

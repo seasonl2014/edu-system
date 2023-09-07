@@ -34,7 +34,7 @@ public class EduCouponStock extends BaseEntity {
     private String stockName;
 
     /**
-     * 状态 0表示未生成，1表示已生成
+     * 批次状态 0表示未生成，1 未激活，2表示审核中，3表示运行中 4表示已停止，5表示暂停发放
      */
     @Column
     private Integer status;
@@ -124,6 +124,12 @@ public class EduCouponStock extends BaseEntity {
      */
     @Column
     private Long transactionMinimum;
+
+    /**
+     * 已发券数量 说明：已发券数量
+     */
+    @Column
+    private Integer distributedCoupons;
 
 
 

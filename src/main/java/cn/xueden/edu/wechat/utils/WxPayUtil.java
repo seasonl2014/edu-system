@@ -31,7 +31,7 @@ public class WxPayUtil {
      * @param request
      * @return
      */
-    private static String getRequestBody(HttpServletRequest request) {
+    public static String getRequestBody(HttpServletRequest request) {
 
         StringBuffer sb = new StringBuffer();
 
