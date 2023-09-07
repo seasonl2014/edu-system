@@ -6,12 +6,11 @@ import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
-import com.wechat.pay.java.service.partnerpayments.nativepay.model.Transaction;
+import com.wechat.pay.java.service.payments.model.Transaction;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;

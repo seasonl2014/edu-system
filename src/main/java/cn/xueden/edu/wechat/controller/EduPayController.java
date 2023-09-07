@@ -13,7 +13,8 @@ import cn.xueden.websocket.WebSocketServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.wechat.pay.java.service.partnerpayments.nativepay.model.Transaction;
+
+import com.wechat.pay.java.service.payments.model.Transaction;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,14 +51,17 @@ public class EduPayController {
 
     private final IEduWxpayService eduWxpayService;
 
+    private final IEduStudentService eduStudentService;
 
-    public EduPayController(IEduStudentBuyVipService studentBuyVipService, IEduStudentBuyCourseService studentBuyCourseService, IEduDealMoneyService eduDealMoneyService, IEduCourseService eduCourseService, IEduTeacherIncomeDetailsService eduTeacherIncomeDetailsService, IEduWxpayService eduWxpayService) {
+
+    public EduPayController(IEduStudentBuyVipService studentBuyVipService, IEduStudentBuyCourseService studentBuyCourseService, IEduDealMoneyService eduDealMoneyService, IEduCourseService eduCourseService, IEduTeacherIncomeDetailsService eduTeacherIncomeDetailsService, IEduWxpayService eduWxpayService, IEduStudentService eduStudentService) {
         this.studentBuyVipService = studentBuyVipService;
         this.studentBuyCourseService = studentBuyCourseService;
         this.eduDealMoneyService = eduDealMoneyService;
         this.eduCourseService = eduCourseService;
         this.eduTeacherIncomeDetailsService = eduTeacherIncomeDetailsService;
         this.eduWxpayService = eduWxpayService;
+        this.eduStudentService = eduStudentService;
     }
 
     /**
@@ -69,7 +73,7 @@ public class EduPayController {
         log.info("购买VIP微信支付开始返回通知");
         // 获取微信支付信息
         EduWxpay dbWxpay =  eduWxpayService.getOne();
-        // 从notification中获取解密报文
+        // 从Transaction中获取解密报文
         Transaction transaction = WxPayUtil.verificationAndDecryption(request,dbWxpay);
         if(transaction==null){
             return NotifyResult.create().fail();
@@ -145,7 +149,10 @@ public class EduPayController {
             if("SUCCESS".equals(transaction.getTradeState().name())){
                 String Out_trade_no = transaction.getOutTradeNo();
                 if(Out_trade_no!=null){
+                    // 购买课程成功后，处理相关业务
                     updateStudentBuyCourse(Out_trade_no);
+                    // 获取购买者微信公众平台下的openid
+                    getSpOpenId(transaction);
                 }
 
             }
@@ -228,6 +235,21 @@ public class EduPayController {
      */
     private void teacherIncome(String orderNo){
         eduTeacherIncomeDetailsService.teacherIncome(orderNo);
+    }
+
+    /**
+     * 获取微信公众平台下的用户openid
+     * @param transaction
+     */
+    private void getSpOpenId(Transaction transaction){
+        // 获取订单详情
+        EduStudentBuyCourse pay=studentBuyCourseService.getByOrderNumber(transaction.getOutTradeNo());
+        EduStudent dbEduStudent = eduStudentService.getById(pay.getStudentId());
+        if(dbEduStudent!=null&&dbEduStudent.getSpOpenid()==null){
+            dbEduStudent.setSpOpenid(transaction.getPayer().getOpenid());
+            eduStudentService.editStudent(dbEduStudent);
+        }
+
     }
 
 }

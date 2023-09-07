@@ -3,12 +3,15 @@ package cn.xueden.edu.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 
+import cn.xueden.edu.domain.EduCourse;
 import cn.xueden.edu.domain.EduTeacher;
+import cn.xueden.edu.repository.EduCourseRepository;
 import cn.xueden.edu.repository.EduTeacherRepository;
 import cn.xueden.edu.service.IEduTeacherService;
 import cn.xueden.edu.service.dto.EduTeacherQueryCriteria;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,8 +31,11 @@ public class EduTeacherServiceImpl implements IEduTeacherService {
 
     private final EduTeacherRepository eduTeacherRepository;
 
-    public EduTeacherServiceImpl(EduTeacherRepository eduTeacherRepository) {
+    private final EduCourseRepository eduCourseRepository;
+
+    public EduTeacherServiceImpl(EduTeacherRepository eduTeacherRepository, EduCourseRepository eduCourseRepository) {
         this.eduTeacherRepository = eduTeacherRepository;
+        this.eduCourseRepository = eduCourseRepository;
     }
 
     /**
@@ -42,7 +48,17 @@ public class EduTeacherServiceImpl implements IEduTeacherService {
     public Object getList(EduTeacherQueryCriteria queryCriteria, Pageable pageable) {
        Page<EduTeacher> page = eduTeacherRepository.findAll((root, query, criteriaBuilder)->
                 QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page);
+
+       for (EduTeacher teacher:page.getContent()){
+           // 统计教师课程数量
+           EduCourse searchEduCourse = new EduCourse();
+           searchEduCourse.setTeacherId(teacher.getId());
+           Example<EduCourse> example = Example.of(searchEduCourse);
+           Long count = eduCourseRepository.count(example);
+           teacher.setCourseTotal(count);
+       }
+
+       return PageUtil.toPage(page);
     }
 
     /**

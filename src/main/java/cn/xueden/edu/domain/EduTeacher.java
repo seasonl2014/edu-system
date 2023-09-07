@@ -87,4 +87,10 @@ public class EduTeacher extends BaseEntity {
      * 收款银行
      */
     private String bank;
+
+    /**
+     * 课程数量
+     */
+    @Transient
+    private Long courseTotal;
 }

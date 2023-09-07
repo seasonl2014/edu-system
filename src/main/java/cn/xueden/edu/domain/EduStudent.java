@@ -77,16 +77,23 @@ public class EduStudent extends BaseEntity {
     private String qq;
 
     /**
-     * 绑定微信扫码登录
+     * 绑定微信扫码登录(微信开放平台对应的openid)
      */
     @Column(name = "wx_open_id")
     private String wxOpenId;
 
     /**
-     * 微信unionid
+     * 微信unionid (微信开放平台对应的unionId)
      */
     @Column(name = "wx_union_id")
     private String unionId;
+
+    /**
+     * 微信用户openid(微信公众平台对应的openid)
+     */
+    @Column
+    private String spOpenid;
+
 
     /**
      * 状态，1表示启用，0表示禁用

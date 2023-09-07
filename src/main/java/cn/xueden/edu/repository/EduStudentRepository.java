@@ -26,4 +26,11 @@ public interface EduStudentRepository extends JpaRepository<EduStudent, Long>, J
      * @return
      */
     EduStudent getByWxOpenId(String openid);
+
+    /**
+     * 根据学员编号获取信息
+     * @param studentNo
+     * @return
+     */
+    EduStudent findByStuNo(String studentNo);
 }
