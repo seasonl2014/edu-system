@@ -74,5 +74,13 @@ public class EduCouponController {
         return BaseResult.success("ID为"+couponId+"的代金券查询成功");
     }
 
+    @EnableSysLog("【后台】根据指定批次号获取代金券发放明细列表数据")
+    @GetMapping("stock/view/{stockId}")
+    public ResponseEntity<Object> viewCouponByStockId(@PathVariable String stockId, PageVo pageVo){
+        Pageable pageable = PageRequest.of(pageVo.getPageIndex()-1, pageVo.getPageSize(),
+                Sort.Direction.DESC,"id");
+        return new ResponseEntity<>(eduCouponService.viewCouponByStockId(stockId,pageable), HttpStatus.OK);
+    }
+
 
 }

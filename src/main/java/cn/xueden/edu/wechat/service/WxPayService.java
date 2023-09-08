@@ -173,16 +173,19 @@ public class WxPayService {
      * */
     public  CreateCouponStockResponse createCouponStock(EduWxpay dbEduWxpay,
                                                         EduCouponStock eduCoupon) {
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config =
-                new RSAAutoCertificateConfig.Builder()
-                        .merchantId(dbEduWxpay.getMerchantId())
-                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
-                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
-                        .apiV3Key(dbEduWxpay.getApiV3())
-                        .build();
-        // 初始化服务
-        cashCouponsService = new CashCouponsService.Builder().config(config).build();
+
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
         CreateCouponStockRequest request = new CreateCouponStockRequest();
         // 开始时间
         request.setAvailableBeginTime(eduCoupon.getAvailableBeginTime());
@@ -273,16 +276,18 @@ public class WxPayService {
                                           EduCouponStock eduCoupon,
                                           EduWxpay dbEduWxpay) {
 
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config =
-                new RSAAutoCertificateConfig.Builder()
-                        .merchantId(dbEduWxpay.getMerchantId())
-                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
-                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
-                        .apiV3Key(dbEduWxpay.getApiV3())
-                        .build();
-        // 初始化服务
-        cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
 
         SendCouponRequest request = new SendCouponRequest();
 
@@ -317,16 +322,18 @@ public class WxPayService {
     /** 激活开启指定批次批次 */
     public  StartStockResponse startStock(EduCouponStock eduCoupon,
                                           EduWxpay dbEduWxpay) {
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config =
-                new RSAAutoCertificateConfig.Builder()
-                        .merchantId(dbEduWxpay.getMerchantId())
-                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
-                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
-                        .apiV3Key(dbEduWxpay.getApiV3())
-                        .build();
-        // 初始化服务
-        cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
         StartStockRequest request = new StartStockRequest();
         try {
             // 创建批次的商户号 说明：批次创建方商户号
@@ -335,12 +342,6 @@ public class WxPayService {
             request.setStockId(eduCoupon.getStockId());
             StartStockResponse response = cashCouponsService.startStock(request);
             log.info("激活开启指定批次批次返回信息{}",response);
-            // 查询代金券消息通知地址
-            Callback callback = queryCallback(dbEduWxpay);
-            if(callback==null){
-                // 设置代金券消息通知地址
-                setCallback(true,dbEduWxpay);
-            }
             return response;
         } catch (HttpException e) { // 发送HTTP请求失败
             // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
@@ -361,16 +362,18 @@ public class WxPayService {
      * */
     public  Stock queryStock(EduCouponStock eduCoupon,
                              EduWxpay dbEduWxpay) {
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config =
-                new RSAAutoCertificateConfig.Builder()
-                        .merchantId(dbEduWxpay.getMerchantId())
-                        .privateKey(dbEduWxpay.getMerchantPrivatekey())
-                        .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
-                        .apiV3Key(dbEduWxpay.getApiV3())
-                        .build();
-        // 初始化服务
-        cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
         QueryStockRequest request = new QueryStockRequest();
         try {
             // 批次号 说明：批次id
@@ -399,6 +402,19 @@ public class WxPayService {
      * */
     public  Callback queryCallback(EduWxpay dbEduWxpay) {
 
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
+
         QueryCallbackRequest request = new QueryCallbackRequest();
         try {
             request.setMchid(dbEduWxpay.getMerchantId());
@@ -422,6 +438,18 @@ public class WxPayService {
     /** 设置代金券消息通知地址 */
     public static SetCallbackResponse setCallback(Boolean _switch,
                                                   EduWxpay dbEduWxpay) {
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
         SetCallbackRequest request = new SetCallbackRequest();
         try {
             // 回调开关 说明：true-开启推送；false-停止推送
@@ -446,6 +474,45 @@ public class WxPayService {
         }
         return null;
 
+    }
+
+    /** 查询代金券详情 */
+    public  Coupon queryCoupon(EduWxpay dbEduWxpay,String couponId,String openid) {
+        if(cashCouponsService==null){
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            Config config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(dbEduWxpay.getMerchantId())
+                            .privateKey(dbEduWxpay.getMerchantPrivatekey())
+                            .merchantSerialNumber(dbEduWxpay.getMerchantSerialnumber())
+                            .apiV3Key(dbEduWxpay.getApiV3())
+                            .build();
+            // 初始化服务
+            cashCouponsService = new CashCouponsService.Builder().config(config).build();
+        }
+
+        QueryCouponRequest request = new QueryCouponRequest();
+        try {
+            // 代金券ID
+            request.setCouponId(couponId);
+            // 公众账号ID
+            request.setAppid(dbEduWxpay.getAppId());
+            // 用户openid
+            request.setOpenid(openid);
+            Coupon response = cashCouponsService.queryCoupon(request);
+            log.info("查询代金券详情返回信息{}",response);
+            return response;
+        } catch (HttpException e) { // 发送HTTP请求失败
+            // 调用e.getHttpRequest()获取请求打印日志或上报监控，更多方法见HttpException定义
+            log.info("发送HTTP请求失败",e);
+        } catch (ServiceException e) { // 服务返回状态小于200或大于等于300，例如500
+            // 调用e.getResponseBody()获取返回体打印日志或上报监控，更多方法见ServiceException定义
+            log.info("服务返回状态小于200或大于等于300",e);
+        } catch (MalformedMessageException e) { // 服务返回成功，返回体类型不合法，或者解析返回体失败
+            // 调用e.getMessage()获取信息打印日志或上报监控，更多方法见MalformedMessageException定义
+            log.info("返回体类型不合法，或者解析返回体失败",e);
+        }
+        return null;
     }
 
 }

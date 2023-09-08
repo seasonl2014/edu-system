@@ -49,4 +49,12 @@ public interface IEduCouponStockService {
      * @param couponId
      */
     void queryStock(Long couponId);
+
+    /**
+     * 根据指定批次号获取代金券发放明细列表数据
+     * @param stockId
+     * @param pageable
+     * @return
+     */
+    Object viewCouponByStockId(String stockId, Pageable pageable);
 }

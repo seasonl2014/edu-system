@@ -16,6 +16,7 @@ import cn.xueden.exception.BadRequestException;
 import cn.xueden.utils.PageUtil;
 import cn.xueden.utils.QueryHelp;
 import cn.xueden.utils.XuedenUtil;
+import com.wechat.pay.java.service.cashcoupons.model.Coupon;
 import com.wechat.pay.java.service.cashcoupons.model.CreateCouponStockResponse;
 import com.wechat.pay.java.service.cashcoupons.model.SendCouponResponse;
 import com.wechat.pay.java.service.cashcoupons.model.Stock;
@@ -182,5 +183,47 @@ public class EduCouponStockServiceImpl implements IEduCouponStockService {
         dbEduCoupon.setDistributedCoupons(stock.getDistributedCoupons());
         eduCouponRepository.save(dbEduCoupon);
         System.out.println("查询结果："+stock);
+    }
+
+    /**
+     * 根据指定批次号获取代金券发放明细列表数据
+     * @param stockId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object viewCouponByStockId(String stockId, Pageable pageable) {
+        // 获取微信支付配置信息
+        EduWxpay dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+
+        EduCouponQueryCriteria queryCriteria = new EduCouponQueryCriteria();
+        queryCriteria.setStockId(stockId);
+        Page<EduCouponGrantRecord> page = eduCouponGrantRecordRepository.findAll((root, query, criteriaBuilder)->
+                QueryHelp.getPredicate(root,queryCriteria,criteriaBuilder),pageable);
+
+        for (EduCouponGrantRecord record:page.getContent()){
+            // 获取学员信息
+            EduStudent dbEduStudent = eduStudentRepository.getReferenceById(record.getStudentId());
+
+            // 代金券详情
+            Coupon response = wxPayService.queryCoupon(dbEduWxpay,record.getStuCouponId(),dbEduStudent.getSpOpenid());
+
+            // 更新代金券信息
+            if(response!=null){
+                // 状态
+                record.setStatus(response.getStatus());
+                // 开始时间
+                record.setAvailableBeginTime(response.getAvailableBeginTime());
+                // 到期时间
+                record.setAvailableEndTime(response.getAvailableEndTime());
+                // 面额 (分需要转换成元)
+                record.setCouponAmount(response.getNormalCouponInformation().getCouponAmount()/100);
+                // 门槛(分需要转换成元)
+                record.setTransactionMinimum(response.getNormalCouponInformation().getTransactionMinimum()/100);
+                eduCouponGrantRecordRepository.save(record);
+            }
+        }
+
+        return PageUtil.toPage(page);
     }
 }

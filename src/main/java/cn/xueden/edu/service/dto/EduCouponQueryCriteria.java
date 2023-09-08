@@ -14,6 +14,12 @@ public class EduCouponQueryCriteria {
 
 
     /**
+     * 批次编号
+     */
+    @EnableXuedenQuery
+    private String stockId;
+
+    /**
      * 状态
      */
     @EnableXuedenQuery
