@@ -7,6 +7,12 @@ edu-system在线教育平台主要面向个人开发者创业而打造的一站�
 
 后台项目地址github:( [edu-system](https://github.com/seasonl2014/edu-system.git))
 
+在线预览地址：http://www.xueden.cn/index
+
+在线测试地址：http://go.xueden.cn/index
+
+在线后台测试地址：http://go.xueden.cn/login
+
 
 
 ## 联系作者
