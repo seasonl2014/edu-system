@@ -1,4 +1,6 @@
 # edu-system在线教育平台
+edu-system在线教育平台主要面向个人开发者创业而打造的一站式在线教育平台，功能简洁易维护，运维成本低等特点，让个人开发者专注录制课程，提升个人收入。如果您正在打算自己创业不妨使用它来试试吧！
+
 ## 项目地址
 
 前端项目地址github:( [edu-system-web](https://github.com/seasonl2014/edu-system-web.git))
