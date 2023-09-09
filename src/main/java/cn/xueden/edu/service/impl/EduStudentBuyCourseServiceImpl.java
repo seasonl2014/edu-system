@@ -155,7 +155,7 @@ public class EduStudentBuyCourseServiceImpl implements IEduStudentBuyCourseServi
         wxOrderDto.setOut_trade_no(""+orderNo+"");
 
         wxOrderDto.setDescription(eduStudentBuyCourse.getRemarks());
-        wxOrderDto.setNotify_url(dbEduWxpay.getNotifyCourseUrl());
+        wxOrderDto.setNotify_url(dbEduWxpay.getNotifyWxPayUrl()+"edu/pay/wxCourseCallback");
         try {
             String code=wxPayService.CreateNativeOrder(wxOrderDto,dbEduWxpay);
             return code;

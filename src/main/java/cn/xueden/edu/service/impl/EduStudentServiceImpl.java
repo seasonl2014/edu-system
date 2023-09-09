@@ -2,25 +2,23 @@ package cn.xueden.edu.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.http.HttpUtil;
 import cn.xueden.base.BaseResult;
-import cn.xueden.edu.domain.EduCourse;
-import cn.xueden.edu.domain.EduStudent;
-import cn.xueden.edu.domain.EduStudentBuyCourse;
-import cn.xueden.edu.domain.EduStudentId;
-import cn.xueden.edu.repository.EduCourseRepository;
-import cn.xueden.edu.repository.EduStudentBuyCourseRepository;
-import cn.xueden.edu.repository.EduStudentIdRepository;
-import cn.xueden.edu.repository.EduStudentRepository;
+import cn.xueden.edu.domain.*;
+import cn.xueden.edu.repository.*;
 import cn.xueden.edu.service.IEduStudentService;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
 
 import cn.xueden.edu.vo.PassWordModel;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
+import cn.xueden.edu.wechat.constant.WxConstants;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.sms.SendSmsService;
 import cn.xueden.utils.*;
 
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -54,12 +52,20 @@ public class EduStudentServiceImpl implements IEduStudentService {
 
     private final SendSmsService sendSmsService;
 
-    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, SendSmsService sendSmsService) {
+    private final EduCouponGrantRecordRepository eduCouponGrantRecordRepository;
+
+    private final EduWxpayRepository eduWxpayRepository;
+
+    private static EduWxpay dbEduWxpay;
+
+    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, SendSmsService sendSmsService, EduCouponGrantRecordRepository eduCouponGrantRecordRepository, EduWxpayRepository eduWxpayRepository) {
         this.studentRepository = studentRepository;
         this.eduStudentIdRepository = eduStudentIdRepository;
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
         this.eduCourseRepository = eduCourseRepository;
         this.sendSmsService = sendSmsService;
+        this.eduCouponGrantRecordRepository = eduCouponGrantRecordRepository;
+        this.eduWxpayRepository = eduWxpayRepository;
     }
 
     /**
@@ -333,5 +339,122 @@ public class EduStudentServiceImpl implements IEduStudentService {
             dbEduStudent.setPassword(Md5Util.Md5(passWordModel.getNewPassWord()));
             studentRepository.save(dbEduStudent);
         }
+    }
+
+    /**
+     * 个人中心获取学员我的优惠券
+     * @param studentId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Object getMyCouponList(Long studentId, Pageable pageable) {
+
+        Page<EduCouponGrantRecord> page = eduCouponGrantRecordRepository.findListByStudentId(studentId,pageable);
+
+        return PageUtil.toPage(page);
+    }
+
+    @Override
+    public String getQrcode() {
+        // 获取微信支付配置信息
+        if(dbEduWxpay == null){
+            dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+        }
+        //拼接请求地址
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("https://api.weixin.qq.com/cgi-bin/token");
+        buffer.append("?grant_type=client_credential");
+        buffer.append("&appid=%s");
+        buffer.append("&secret=%s");
+        //设置路径参数
+        String url = String.format(buffer.toString(),
+                dbEduWxpay.getAppId(),
+                dbEduWxpay.getAppSecret());
+        //get请求
+        try {
+            String tokenString = HttpUtil.get(url);
+            //获取access_token
+            JSONObject jsonObject = JSONObject.parseObject(tokenString);
+            String access_token = jsonObject.getString("access_token");
+
+            // 获取ticket
+            StringBuffer ticketBuffer = new StringBuffer();
+            ticketBuffer.append("https://api.weixin.qq.com/cgi-bin/qrcode/create");
+            ticketBuffer.append("?access_token="+access_token);
+            String ticketUrl = String.format(ticketBuffer.toString());
+            // 请求参数
+
+            JsonObject data = new JsonObject();
+            data.addProperty("action_name", "QR_STR_SCENE");
+            data.addProperty("expire_seconds", 300);
+            JsonObject scene = new JsonObject();
+            scene.addProperty("scene_str", WxConstants.SCENE_STR);
+            JsonObject actionInfo = new JsonObject();
+            actionInfo.add("scene", scene);
+            data.add("action_info", actionInfo);
+
+            String ticketString = HttpUtil.post(ticketUrl,data.toString());
+            JSONObject jsonObjectTicket = JSONObject.parseObject(ticketString);
+            String ticket = jsonObjectTicket.getString("ticket");
+            String qrcodeurl = jsonObjectTicket.getString("url");
+            System.out.println("ticket:"+ticket);
+            System.out.println("qrcodeurl:"+qrcodeurl);
+            return qrcodeurl;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    /**
+     * 更新学员的对应公众号的openId，并发送代金券
+     * @param fromUser
+     * @param eventKey
+     */
+    @Override
+    public void subscribe(String fromUser, String eventKey) {
+
+        // 获取微信支付配置信息
+        if(dbEduWxpay == null){
+            dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+        }
+        //拼接请求地址
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("https://api.weixin.qq.com/cgi-bin/token");
+        buffer.append("?grant_type=client_credential");
+        buffer.append("&appid=%s");
+        buffer.append("&secret=%s");
+        //设置路径参数
+        String url = String.format(buffer.toString(),
+                dbEduWxpay.getAppId(),
+                dbEduWxpay.getAppSecret());
+
+        try {
+            String tokenString = HttpUtil.get(url);
+            //获取access_token
+            JSONObject jsonObject = JSONObject.parseObject(tokenString);
+            String access_token = jsonObject.getString("access_token");
+
+            // 获取微信用户信息
+            //拼接请求地址
+            StringBuffer wxUserInfoBuffer = new StringBuffer();
+            wxUserInfoBuffer.append("https://api.weixin.qq.com/cgi-bin/user/info");
+            wxUserInfoBuffer.append("?access_token="+access_token);
+            wxUserInfoBuffer.append("&lang=zh_CN");
+            wxUserInfoBuffer.append("&openid=%s");
+
+            String wxUserInfoUrl = String.format(wxUserInfoBuffer.toString(),
+                    fromUser);
+            String wxUserInfoString = HttpUtil.get(wxUserInfoUrl);
+            //获取微信用户信息
+            JSONObject wxUserJsonObject = JSONObject.parseObject(wxUserInfoString);
+
+        }catch (Exception e){
+
+        }
+
+      // 接口调用请求说明 http请求方式: GET https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN
     }
 }

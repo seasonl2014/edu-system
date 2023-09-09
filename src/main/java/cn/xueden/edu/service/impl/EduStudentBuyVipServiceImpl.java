@@ -164,7 +164,7 @@ public class EduStudentBuyVipServiceImpl implements IEduStudentBuyVipService {
             wxOrderDto.setAmount(amount);
             wxOrderDto.setOut_trade_no(""+orderNo+"");
             wxOrderDto.setDescription("用户购买【vip全站会员】");
-            wxOrderDto.setNotify_url(dbEduWxpay.getNotifyVipUrl());
+            wxOrderDto.setNotify_url(dbEduWxpay.getNotifyWxPayUrl()+"edu/pay/wxVipCallback");
             try {
                 String code=wxPayService.CreateNativeOrder(wxOrderDto,dbEduWxpay);
                 return code;

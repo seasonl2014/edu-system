@@ -125,4 +125,24 @@ public interface IEduStudentService {
      * @param passWordModel
      */
     void saveFindPassWord(PassWordModel passWordModel);
+
+    /**
+     * 个人中心获取学员我的优惠券
+     * @param studentId
+     * @param pageable
+     * @return
+     */
+    Object getMyCouponList(Long studentId, Pageable pageable);
+
+    /**
+     * 获取公众号二维码
+     */
+    String getQrcode();
+
+    /**
+     * 更新学员的对应公众号的openId，并发送代金券
+     * @param fromUser
+     * @param eventKey
+     */
+    void subscribe(String fromUser, String eventKey);
 }

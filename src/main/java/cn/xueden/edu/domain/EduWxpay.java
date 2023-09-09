@@ -21,8 +21,17 @@ public class EduWxpay extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    /**
+     * 公众号APPid
+     */
     @Column(name = "app_id", nullable = false, length = 50)
     private String appId;
+
+    /**
+     * 公众号APPSecret
+     */
+    @Column(name = "app_secret",nullable = false,length = 200)
+    private String appSecret;
 
     @Column(name = "merchant_id", nullable = false, length = 50)
     private String merchantId;
@@ -38,21 +47,16 @@ public class EduWxpay extends BaseEntity {
 
 
     /**
-     * 购买VIP会员异步回调通知
+     * 微信支付异步回调通知
      */
     @Column
-    private String notifyVipUrl;
+    private String notifyWxPayUrl;
+
 
     /**
-     * 购买课程异步回调通知
+     * 代金券核销（或公众号平台）回调通知
      */
     @Column
-    private String notifyCourseUrl;
-
-    /**
-     * 代金券核销回调通知
-     */
-    @Column
-    private String notifyCouponUrl;
+    private String notifySpUrl;
 
 }

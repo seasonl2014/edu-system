@@ -12,8 +12,10 @@ import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import cn.xueden.system.domain.SysUser;
 import cn.xueden.utils.JWTUtil;
 import cn.xueden.utils.PageVo;
+import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -195,6 +197,36 @@ public class EduStudentCenterController {
             eduStudentService.savePassWord(passWordModel,studentId);
         }
         return BaseResult.success("修改成功");
+    }
+
+    @EnableSysLog("【前台】个人中心获取学员我的优惠券")
+    @GetMapping("getMyCouponList")
+    public BaseResult getMyCouponList(PageVo pageVo, HttpServletRequest request){
+
+        Pageable pageable = PageRequest.of(pageVo.getPageIndex()-1, pageVo.getPageSize(),
+                Sort.Direction.DESC,"id");
+
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            return BaseResult.success(eduStudentService.getMyCouponList(studentId,pageable));
+        }else {
+            return BaseResult.fail("获取数据失败，请先登录！");
+        }
+    }
+
+    @EnableSysLog("【前台】个人中心获取微信公众号二维码")
+    @GetMapping("getQrcode")
+    public BaseResult getQrcode(){
+        String qrCodeUrl = eduStudentService.getQrcode();
+        if(qrCodeUrl==null){
+            return BaseResult.fail("获取失败");
+        }else {
+            return BaseResult.success(qrCodeUrl);
+        }
+
     }
 
 }

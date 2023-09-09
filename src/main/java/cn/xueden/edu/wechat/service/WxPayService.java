@@ -455,8 +455,7 @@ public class WxPayService {
             // 回调开关 说明：true-开启推送；false-停止推送
             request.setSwitch(_switch);
             // 通知url地址 说明：支付通知商户url地址
-            //request.setNotifyUrl("https://xueden.natapp4.cc/edu/coupon/callback");
-            request.setNotifyUrl(dbEduWxpay.getNotifyCouponUrl());
+            request.setNotifyUrl(dbEduWxpay.getNotifySpUrl()+"edu/coupon/callback");
             // 商户号
             request.setMchid(dbEduWxpay.getMerchantId());
             SetCallbackResponse response = cashCouponsService.setCallback(request);
