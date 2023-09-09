@@ -21,6 +21,8 @@ edu-system在线教育平台主要面向个人开发者创业而打造的一站�
 
 大家有什么问题和建议的话，可以加入我的知识星球，一起学习探讨。
 
+链接地址：https://t.zsxq.com/12j4zgJT6
+
 ![image-20230910072715106](http://picture.xueden.cn/typora/image-20230910072715106.png)
 
 ## 系统功能说明
