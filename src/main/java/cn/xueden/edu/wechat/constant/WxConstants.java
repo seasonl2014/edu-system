@@ -14,4 +14,9 @@ public class WxConstants {
     /** 带参数二维码常量 前缀*/
     public static final String SCENE_KEY = "qrscene_";
 
+    /** 微信公众平台服务器配置 令牌(Token)*/
+    public static final String MP_TOKEN = "Sn85oA3iXKIYgdZSS5da";
+
+
+
 }

@@ -219,14 +219,22 @@ public class EduStudentCenterController {
 
     @EnableSysLog("【前台】个人中心获取微信公众号二维码")
     @GetMapping("getQrcode")
-    public BaseResult getQrcode(){
-        String qrCodeUrl = eduStudentService.getQrcode();
-        if(qrCodeUrl==null){
-            return BaseResult.fail("获取失败");
-        }else {
-            return BaseResult.success(qrCodeUrl);
-        }
+    public BaseResult getQrcode(HttpServletRequest request){
 
+        String token = request.getHeader("studentToken");
+        if(token!= null && !token.equals("null")&& !token.equals("")){
+            // 获取登录学员ID
+            DecodedJWT decodedJWT = JWTUtil.verify(token);
+            Long studentId= Long.parseLong(decodedJWT.getClaim("studentId").asString());
+            String qrCodeUrl = eduStudentService.getQrcode(studentId);
+            if(qrCodeUrl==null){
+                return BaseResult.fail("获取失败");
+            }else {
+                return BaseResult.success(qrCodeUrl);
+            }
+        }else {
+            return BaseResult.fail("获取数据失败，请先登录！");
+        }
     }
 
 }

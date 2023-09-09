@@ -365,8 +365,8 @@ public class EduStudentServiceImpl implements IEduStudentService {
      * @return
      */
     @Override
-    public String getQrcode() {
-        String codeUrl =  weChatService.getQrcode();
+    public String getQrcode(Long studentId) {
+        String codeUrl =  weChatService.getQrcode(studentId);
         if(codeUrl!=null){
             return codeUrl;
         }
@@ -388,17 +388,20 @@ public class EduStudentServiceImpl implements IEduStudentService {
             // 获取微信用户是否关注公众号
             int subscribe = wxUserInfo.getInteger("subscribe");
             // 获取二维码参数
-            String qr_scene_str = wxUserInfo.getString("qr_scene_str");
+            Long qr_scene = wxUserInfo.getLong("qr_scene");
 
             // 根据微信用户unionId获取学员信息
-            EduStudent dbEduStudent = studentRepository.getByUnionId(unionId);
+            EduStudent dbEduStudent = studentRepository.getReferenceById(qr_scene);
             // 更新学员信息
             if(dbEduStudent!=null){
                 dbEduStudent.setSpOpenid(fromUser);
+                dbEduStudent.setUnionId(unionId);
                 studentRepository.save(dbEduStudent);
+            }else {
+                throw new BadRequestException("查询不到学员信息");
             }
             // 给关注公众号的学员发送代金券
-            if(subscribe==1&&qr_scene_str.equals(WxConstants.SCENE_STR)){
+            if(subscribe==1){
 
             }
 

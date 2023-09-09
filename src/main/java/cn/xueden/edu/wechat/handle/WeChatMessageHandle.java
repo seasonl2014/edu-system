@@ -10,6 +10,7 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutTextMessage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -42,7 +43,7 @@ public class WeChatMessageHandle {
                         .toUser(wxMessage.getFromUser()).build();
                 return response.toXml();
             // 处理关注公众号事件,并从学灯网扫码带参数的二维码
-            }else if (wxMessage.getEvent().equals(WxConsts.EventType.SUBSCRIBE)&& wxMessage.getEventKey().equals(WxConstants.SCENE_KEY+ WxConstants.SCENE_STR)){
+            }else if (wxMessage.getEvent().equals(WxConsts.EventType.SUBSCRIBE)&& StringUtils.isNotBlank(wxMessage.getEventKey())){
                 // 更新学员的对应公众号的openId，并发送代金券
                 eduStudentService.subscribe(wxMessage.getFromUser());
                 log.info("用户扫了带参数的二维码并第一次关注执行的事件{}",wxMessage.getEventKey());
@@ -51,6 +52,8 @@ public class WeChatMessageHandle {
                 log.info("用户取消关注执行的事件{}",wxMessage);
             // 处理已经关注过公众号事件
             }else if(wxMessage.getEvent().equals(WxConsts.EventType.SCAN)){
+                // 更新学员的对应公众号的openId，并发送代金券
+                eduStudentService.subscribe(wxMessage.getFromUser());
                 log.info("用户扫了带参数的二维码并已关注执行的事件{}",wxMessage);
             }
 
@@ -62,7 +65,7 @@ public class WeChatMessageHandle {
 
     public boolean checkSignature(String signature, String timestamp, String nonce) {
         // Sort the token, timestamp, and nonce alphabetically
-        String[] arr = {"Sn85oA3iXKIYgdZSS5da", timestamp, nonce};
+        String[] arr = {WxConstants.MP_TOKEN, timestamp, nonce};
         Arrays.sort(arr);
 
         // Concatenate them

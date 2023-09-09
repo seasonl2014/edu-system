@@ -94,9 +94,10 @@ public class WeChatService {
 
     /**
      * 生成带参数的公众号二维码
+     * @param studentId 学员ID
      * @return
      */
-    public String getQrcode(){
+    public String getQrcode(Long studentId){
         try {
 
             String access_token = getAccessToken();
@@ -112,10 +113,10 @@ public class WeChatService {
             // 请求参数
 
             JsonObject data = new JsonObject();
-            data.addProperty("action_name", "QR_STR_SCENE");
-            data.addProperty("expire_seconds", 300);
+            data.addProperty("action_name", "QR_SCENE");
+            data.addProperty("expire_seconds", 120);
             JsonObject scene = new JsonObject();
-            scene.addProperty("scene_str", WxConstants.SCENE_STR);
+            scene.addProperty("scene_id", studentId);
             JsonObject actionInfo = new JsonObject();
             actionInfo.add("scene", scene);
             data.add("action_info", actionInfo);

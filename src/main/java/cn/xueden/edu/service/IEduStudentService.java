@@ -137,7 +137,7 @@ public interface IEduStudentService {
     /**
      * 获取公众号二维码
      */
-    String getQrcode();
+    String getQrcode(Long studentId);
 
     /**
      * 更新学员的对应公众号的openId，并发送代金券
