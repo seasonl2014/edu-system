@@ -19,8 +19,7 @@ import java.util.Properties;
 @Component
 public class MailService {
 
-    @Autowired
-    private JavaMailSenderImpl mailSender;
+    private JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
     /**
      *
