@@ -142,7 +142,6 @@ public interface IEduStudentService {
     /**
      * 更新学员的对应公众号的openId，并发送代金券
      * @param fromUser
-     * @param eventKey
      */
-    void subscribe(String fromUser, String eventKey);
+    void subscribe(String fromUser);
 }

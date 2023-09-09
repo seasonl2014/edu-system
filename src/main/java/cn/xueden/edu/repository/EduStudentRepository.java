@@ -33,4 +33,11 @@ public interface EduStudentRepository extends JpaRepository<EduStudent, Long>, J
      * @return
      */
     EduStudent findByStuNo(String studentNo);
+
+    /**
+     * 根据微信用户unionId获取学员信息
+     * @param unionId
+     * @return
+     */
+    EduStudent getByUnionId(String unionId);
 }

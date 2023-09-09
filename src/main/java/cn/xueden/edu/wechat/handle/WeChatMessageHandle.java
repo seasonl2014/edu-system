@@ -44,11 +44,14 @@ public class WeChatMessageHandle {
             // 处理关注公众号事件,并从学灯网扫码带参数的二维码
             }else if (wxMessage.getEvent().equals(WxConsts.EventType.SUBSCRIBE)&& wxMessage.getEventKey().equals(WxConstants.SCENE_KEY+ WxConstants.SCENE_STR)){
                 // 更新学员的对应公众号的openId，并发送代金券
-                eduStudentService.subscribe(wxMessage.getFromUser(),wxMessage.getEventKey());
-                log.info("用户扫了带参数的二维码并关系执行的事件{}",wxMessage.getEventKey());
+                eduStudentService.subscribe(wxMessage.getFromUser());
+                log.info("用户扫了带参数的二维码并第一次关注执行的事件{}",wxMessage.getEventKey());
             // 处理取消关注公众号事件
             }else if(wxMessage.getEvent().equals(WxConsts.EventType.UNSUBSCRIBE)){
-
+                log.info("用户取消关注执行的事件{}",wxMessage);
+            // 处理已经关注过公众号事件
+            }else if(wxMessage.getEvent().equals(WxConsts.EventType.SCAN)){
+                log.info("用户扫了带参数的二维码并已关注执行的事件{}",wxMessage);
             }
 
         } catch (Exception e) {
