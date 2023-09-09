@@ -3,6 +3,8 @@ package cn.xueden.system.controller;
 
 import cn.xueden.annotation.EnableSysLog;
 import cn.xueden.base.BaseResult;
+import cn.xueden.edu.domain.EduEmail;
+import cn.xueden.edu.service.IEduEmailService;
 import cn.xueden.email.MailService;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.system.domain.SysUser;
@@ -42,19 +44,18 @@ public class UserController {
     @Value("${user.icon}")
     private String userIcon;
 
-    /**
-     * 发送方
-     */
-    @Value("${spring.mail.username}")
-    private String from;
 
     private final ISysUserService sysUserService;
 
     private final MailService mailService;
 
-    public UserController(ISysUserService sysUserService, MailService mailService) {
+    private final IEduEmailService eduEmailService;
+
+
+    public UserController(ISysUserService sysUserService, MailService mailService, IEduEmailService eduEmailService) {
         this.sysUserService = sysUserService;
         this.mailService = mailService;
+        this.eduEmailService = eduEmailService;
     }
 
     /**
@@ -178,6 +179,10 @@ public class UserController {
     @GetMapping("sendEmail")
     @EnableSysLog("发送邮件")
     public BaseResult sendEmail(@RequestParam("email") String email,HttpServletRequest request){
+
+        // 获取邮箱配置信息
+        EduEmail dbEduEmail = eduEmailService.getOne();
+
         // 发送旧邮箱
         if(email==null || email==""){
             // 获取登录用户ID
@@ -189,7 +194,7 @@ public class UserController {
         }
         int code = XuedenUtil.randomSixNums();
         String content = "验证码："+code+"此验证码用于更换邮箱绑定，请勿将验证码告知他人！";
-        mailService.sendSimpleMail(from,email,email,"修改邮箱验证码",content);
+        mailService.sendSimpleMail(dbEduEmail,email,email,"修改邮箱验证码",content);
         request.getServletContext().setAttribute("code",code);
         return BaseResult.success();
     }

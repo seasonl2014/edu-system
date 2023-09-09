@@ -27,18 +27,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-
-  mail:
-    host: smtp.qq.com
-    port: 465
-    username: 379533177@qq.com
-    password: ryjxbuztvacacahj  # 需要申请到的授权码
-    properties:
-      mail:
-        debug: true
-        smtp:
-          socketFactory:
-            class: javax.net.ssl.SSLSocketFactory
 # 用户头像存放路径
 user:
   icon: E:\\edu-mangement-system\\
