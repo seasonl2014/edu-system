@@ -1,4 +1,10 @@
 # edu-system在线教育平台
+## 项目地址
+
+前端项目地址github:( [edu-system-web](https://github.com/seasonl2014/edu-system-web.git))
+
+后台项目地址github:( [edu-system](https://github.com/seasonl2014/edu-system.git))
+
 ## 系统功能说明
 
 本系统主要分学员端和后台管理端，其中：
