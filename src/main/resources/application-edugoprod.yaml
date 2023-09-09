@@ -1,0 +1,36 @@
+server:
+  port: 8888
+  tomcat:
+    connection-timeout: 36000000
+    max-swallow-size: 500MB
+    max-http-form-post-size: 500MB
+    background-processor-delay: 36000000
+    keep-alive-timeout: 36000000
+# ?????
+spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: z2WUIdftIatSBheXIcuZ
+    url: jdbc:mysql://localhost:3306/edu_system_go?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    hikari:
+      minimum-idle: 10 # ????????
+      maximum-pool-size: 10 # ????????????10
+      idle-timeout: 120000 # ??????????
+      connection-timeout: 30000 # ?????????
+      connection-test-query: Select 1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+# 用户头像存放路径
+user:
+  icon: /home/edu-go/file/
+# 上传文件临时文件夹
+file:
+  path: /home/edu-go/file/
+
