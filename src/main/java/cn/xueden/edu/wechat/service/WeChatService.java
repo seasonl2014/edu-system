@@ -1,13 +1,21 @@
 package cn.xueden.edu.wechat.service;
 
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import cn.xueden.edu.domain.EduWxpay;
 import cn.xueden.edu.repository.EduWxpayRepository;
+
 import cn.xueden.edu.wechat.constant.WxConstants;
+import cn.xueden.edu.wechat.dto.TemplateMessageDto;
 import cn.xueden.exception.BadRequestException;
+import cn.xueden.utils.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**功能描述：微信公众平台业务
  * @author:梁志杰
@@ -132,4 +140,39 @@ public class WeChatService {
         }
         return null;
     }
+
+    /**
+     * 发送模板消息
+     * @param couponId
+     * @param storkId
+     * @param openId
+     * @return
+     */
+    public JSONObject sendMsg(String couponId,String storkId, String openId) {
+        String access_token = getAccessToken();
+        if(access_token==null){
+            return null;
+        }
+
+        String requestUrl = " https://api.weixin.qq.com/cgi-bin/message/template/send?access_token="  + access_token;
+
+        String templateId = "o9d_TbjQBZYK8jZa_q6o6wKAh0plqEsJ6uVAHuwsGyM";
+        TemplateMessageDto templateMessageDto = new TemplateMessageDto();
+        templateMessageDto.setTemplateId(templateId);
+        templateMessageDto.setOpenid(openId);
+        templateMessageDto.setUrl("http://www.xueden.cn/");
+        Map<String, String> dataMap = new HashMap<String, String>();
+        dataMap.put("first", "恭喜领取满额减代金券成功，请注意查收！");
+        dataMap.put("keyword1", "会跳舞的雨");//昵称
+        dataMap.put("keyword2", "69584213");//代金券编号
+        dataMap.put("keyword3", "只能在学灯网使用");//代金券说明
+        dataMap.put("keyword4", DateUtil.changeDateTOStr(new Date()));// 领取时间
+        dataMap.put("remark", "学灯网满额减代金券");
+        templateMessageDto.setDataMap(dataMap);
+        String resp = HttpUtil.post(requestUrl,JSONObject.toJSONString(templateMessageDto));
+        JSONObject jsonObjectMsg = JSONObject.parseObject(resp);
+        System.out.println("发送消息:" + jsonObjectMsg);
+        return jsonObjectMsg;
+    }
+
 }

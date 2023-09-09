@@ -17,6 +17,11 @@ public class WxConstants {
     /** 微信公众平台服务器配置 令牌(Token)*/
     public static final String MP_TOKEN = "Sn85oA3iXKIYgdZSS5da";
 
+    /** 微信公众平台领取代金券消息模板ID*/
+    public static final String GET_COUPON_TEMPLATE_ID = "qrU-CDEgSf5ejgQDJuM_VmkJFA80TuyEfpB3wbG_PP4";
+
+
+
 
 
 }

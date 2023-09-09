@@ -14,12 +14,16 @@ import cn.xueden.edu.vo.PassWordModel;
 import cn.xueden.edu.vo.UpdateStudentInfoModel;
 import cn.xueden.edu.wechat.constant.WxConstants;
 import cn.xueden.edu.wechat.service.WeChatService;
+import cn.xueden.edu.wechat.service.WxPayService;
 import cn.xueden.exception.BadRequestException;
 import cn.xueden.sms.SendSmsService;
 import cn.xueden.utils.*;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
+import com.wechat.pay.java.service.cashcoupons.model.SendCouponResponse;
+import com.wechat.pay.java.service.cashcoupons.model.Stock;
+import com.wechat.pay.java.service.cashcoupons.model.StockCollection;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.BeanUtils;
@@ -62,7 +66,9 @@ public class EduStudentServiceImpl implements IEduStudentService {
 
     private static EduWxpay dbEduWxpay;
 
-    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, SendSmsService sendSmsService, EduCouponGrantRecordRepository eduCouponGrantRecordRepository, EduWxpayRepository eduWxpayRepository, WeChatService weChatService) {
+    private final WxPayService wxPayService;
+
+    public EduStudentServiceImpl(EduStudentRepository studentRepository, EduStudentIdRepository eduStudentIdRepository, EduStudentBuyCourseRepository eduStudentBuyCourseRepository, EduCourseRepository eduCourseRepository, SendSmsService sendSmsService, EduCouponGrantRecordRepository eduCouponGrantRecordRepository, EduWxpayRepository eduWxpayRepository, WeChatService weChatService, WxPayService wxPayService) {
         this.studentRepository = studentRepository;
         this.eduStudentIdRepository = eduStudentIdRepository;
         this.eduStudentBuyCourseRepository = eduStudentBuyCourseRepository;
@@ -71,6 +77,7 @@ public class EduStudentServiceImpl implements IEduStudentService {
         this.eduCouponGrantRecordRepository = eduCouponGrantRecordRepository;
         this.eduWxpayRepository = eduWxpayRepository;
         this.weChatService = weChatService;
+        this.wxPayService = wxPayService;
     }
 
     /**
@@ -378,6 +385,7 @@ public class EduStudentServiceImpl implements IEduStudentService {
      * @param fromUser
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void subscribe(String fromUser) {
         JSONObject wxUserInfo = weChatService.getWxUserInfo(fromUser);
         if (wxUserInfo==null){
@@ -402,7 +410,49 @@ public class EduStudentServiceImpl implements IEduStudentService {
             }
             // 给关注公众号的学员发送代金券
             if(subscribe==1){
+                // 获取微信支付配置信息
+                if(dbEduWxpay==null){
+                    dbEduWxpay = eduWxpayRepository.findFirstByOrderByIdDesc();
+                }
+                // 获取正在运行中的代金券
+                StockCollection response = wxPayService.listStocks(dbEduWxpay);
+                if(response.getTotalCount()>0){
+                    List<Stock> dataStocks = response.getData();
+                    // 开始发放代金券
+                    for (Stock stock:dataStocks){
+                        // 发送单据号
+                        String outRequestNo = XuedenUtil.createOrderNumber();
+                        EduCouponStock eduCoupon = new EduCouponStock();
+                        eduCoupon.setStockId(stock.getStockId());
+                        SendCouponResponse sendCouponResponse = wxPayService.sendCoupon(outRequestNo,dbEduStudent.getSpOpenid(),eduCoupon,dbEduWxpay);
+                        if(sendCouponResponse!=null){
+                            // 保存到发放记录表
+                            // 保存记录到代金券发放记录表
+                            EduCouponGrantRecord tempEduCouponGrantRecord = new EduCouponGrantRecord();
+                            // 发放给学员的代金券id
+                            tempEduCouponGrantRecord.setStuCouponId(sendCouponResponse.getCouponId());
+                            // 创建批次的商户号
+                            tempEduCouponGrantRecord.setStockCreatorMchid(dbEduWxpay.getMerchantId());
+                            // 批次号
+                            tempEduCouponGrantRecord.setStockId(stock.getStockId());
+                            // 代金券名称
+                            tempEduCouponGrantRecord.setCouponName(stock.getStockName());
+                            // 代金券状态
+                            tempEduCouponGrantRecord.setStatus("SENDED");
+                            // 发放学员ID
+                            tempEduCouponGrantRecord.setStudentId(dbEduStudent.getId());
+                            // 开始时间
+                            tempEduCouponGrantRecord.setAvailableBeginTime(stock.getAvailableBeginTime());
+                            // 结束时间
+                            tempEduCouponGrantRecord.setAvailableEndTime(stock.getAvailableEndTime());
+                            eduCouponGrantRecordRepository.save(tempEduCouponGrantRecord);
+                            break;
+                        }
+                    }
 
+                }else {
+                    throw new BadRequestException("没有可领取的代金券！");
+                }
             }
 
         }
