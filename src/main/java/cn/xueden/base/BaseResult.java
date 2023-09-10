@@ -113,5 +113,15 @@ public class BaseResult implements Serializable {
         return BaseResult.createResult(STATUS_FALL,message,result);
     }
 
+    /**
+     * 返回失败带消息和数据、状态
+     * @param message
+     * @param result
+     * @return
+     */
+    public static BaseResult fail(Integer status,String message,Object result){
+        return BaseResult.createResult(status,message,result);
+    }
+
 
 }

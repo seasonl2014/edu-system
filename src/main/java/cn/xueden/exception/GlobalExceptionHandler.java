@@ -23,6 +23,6 @@ public class GlobalExceptionHandler {
     public BaseResult error(BadRequestException e){
         e.printStackTrace();
         log.error(ThrowableUtil.getStackTrace(e));
-        return BaseResult.fail(e.getMessage(),e.getStatus());
+        return BaseResult.fail(e.getStatus(),e.getMessage(),e.getStackTrace());
     }
 }
