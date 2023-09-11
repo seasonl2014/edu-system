@@ -225,7 +225,7 @@ public class XuedenUtil {
         }
         if(!"127.0.0.1".equals(ip)){
             // 服务器存放的路径
-            String dbPath = "/home/zhijie/ip2region.xdb";
+            String dbPath = "/home/xueden/ip2region.xdb";
             // 本地电脑存放的路径
             //String dbPath = "G:\\hotel\\ip2region.xdb";
             Searcher searcher = null;
