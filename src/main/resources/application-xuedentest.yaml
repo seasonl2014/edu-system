@@ -1,0 +1,35 @@
+server:
+  port: 8081
+  tomcat:
+    connection-timeout: 36000000
+    max-swallow-size: 500MB
+    max-http-form-post-size: 500MB
+    background-processor-delay: 36000000
+    keep-alive-timeout: 36000000
+# ?????
+spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 41C3ofPlTNsCpoUiaUVP!
+    url: jdbc:mysql://localhost:3306/edu_system_xueden?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    hikari:
+      minimum-idle: 10 # ????????
+      maximum-pool-size: 10 # ????????????10
+      idle-timeout: 120000 # ??????????
+      connection-timeout: 30000 # ?????????
+      connection-test-query: Select 1
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+# 用户头像存放路径
+user:
+  icon: /home/xueden/file/
+file:
+  path: /home/xueden/file/
+

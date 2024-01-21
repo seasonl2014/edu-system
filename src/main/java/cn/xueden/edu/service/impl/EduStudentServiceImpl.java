@@ -458,4 +458,14 @@ public class EduStudentServiceImpl implements IEduStudentService {
         }
 
     }
+
+    /**
+     * 根据unionId获取学员信息
+     * @param unionid
+     * @return
+     */
+    @Override
+    public EduStudent getByUnionid(String unionid) {
+        return studentRepository.getByUnionId(unionid);
+    }
 }

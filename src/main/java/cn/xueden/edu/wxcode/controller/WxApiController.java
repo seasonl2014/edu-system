@@ -129,8 +129,8 @@ public class WxApiController {
             String openid = jsonObject.getString("openid");
             String unionid = jsonObject.getString("unionid");
 
-            // 根据openid获取学员信息
-            EduStudent dbEduStudent = eduStudentService.getByOpenid(openid);
+            // 根据unionId获取学员信息
+            EduStudent dbEduStudent = eduStudentService.getByUnionid(unionid);
             if(dbEduStudent!=null){
                 if(ipInfo!=null){
                     dbEduStudent.setCity(ipInfo.getCity());

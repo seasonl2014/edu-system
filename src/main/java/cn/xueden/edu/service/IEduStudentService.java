@@ -144,4 +144,11 @@ public interface IEduStudentService {
      * @param fromUser
      */
     void subscribe(String fromUser);
+
+    /**
+     * 根据unionId获取学员信息
+     * @param unionid
+     * @return
+     */
+    EduStudent getByUnionid(String unionid);
 }
