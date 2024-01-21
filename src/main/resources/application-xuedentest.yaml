@@ -15,7 +15,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: 41C3ofPlTNsCpoUiaUVP!
+    password: root
     url: jdbc:mysql://localhost:3306/edu_system_xueden?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=true
     hikari:
       minimum-idle: 10 # ????????
