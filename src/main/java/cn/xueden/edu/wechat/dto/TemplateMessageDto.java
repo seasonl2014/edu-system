@@ -31,7 +31,6 @@ public class TemplateMessageDto {
             for(String key : dataMap.keySet()){
                 JSONObject item = new JSONObject();
                 item.put("value", dataMap.get(key));
-                item.put("color", color);
                 data.put(key,item);
             }
         }

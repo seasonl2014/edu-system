@@ -41,12 +41,19 @@ public class WeChatMessageHandle {
                 String content = "你发送了文本消息：" + wxMessage.getContent();
                 WxMpXmlOutTextMessage response = WxMpXmlOutMessage.TEXT().content(content).fromUser(wxMessage.getToUser())
                         .toUser(wxMessage.getFromUser()).build();
+
+                // 处理回复关键字事件
+
                 return response.toXml();
             // 处理关注公众号事件,并从学灯网扫码带参数的二维码
             }else if (wxMessage.getEvent().equals(WxConsts.EventType.SUBSCRIBE)&& StringUtils.isNotBlank(wxMessage.getEventKey())){
                 // 更新学员的对应公众号的openId，并发送代金券
                 eduStudentService.subscribe(wxMessage.getFromUser());
                 log.info("用户扫了带参数的二维码并第一次关注执行的事件{}",wxMessage.getEventKey());
+                String content = "优惠券已经发放，请登录学灯网，在个人中心我的优惠券查看是否领取成功！";
+                WxMpXmlOutTextMessage response = WxMpXmlOutMessage.TEXT().content(content).fromUser(wxMessage.getToUser())
+                        .toUser(wxMessage.getFromUser()).build();
+                return response.toXml();
             // 处理取消关注公众号事件
             }else if(wxMessage.getEvent().equals(WxConsts.EventType.UNSUBSCRIBE)){
                 log.info("用户取消关注执行的事件{}",wxMessage);
@@ -55,6 +62,10 @@ public class WeChatMessageHandle {
                 // 更新学员的对应公众号的openId，并发送代金券
                 eduStudentService.subscribe(wxMessage.getFromUser());
                 log.info("用户扫了带参数的二维码并已关注执行的事件{}",wxMessage);
+                String content = "优惠券已经发放，请登录学灯网，在个人中心我的优惠券查看是否领取成功！";
+                WxMpXmlOutTextMessage response = WxMpXmlOutMessage.TEXT().content(content).fromUser(wxMessage.getToUser())
+                        .toUser(wxMessage.getFromUser()).build();
+                return response.toXml();
             }
 
         } catch (Exception e) {

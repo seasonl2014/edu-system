@@ -1,5 +1,6 @@
 package cn.xueden.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,5 +27,24 @@ public class DateUtil {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 2024-02-20T00:00:00+08:00 转 2024-02-20 08:34:38
+     * 将带T字符串日期转换为字符串yyyy-MM-dd HH:mm:ss
+     * @param dateTime
+     * @return
+     */
+    public static String changeTStringTOStr(String dateTime) throws ParseException {
+
+        // String dateTime = "2024-02-20T00:00:00+08:00";
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        Date parsedDateTime = inputFormat.parse(dateTime);
+
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = outputFormat.format(parsedDateTime);
+
+        return formattedDateTime;
     }
 }

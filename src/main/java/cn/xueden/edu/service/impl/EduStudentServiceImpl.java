@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -395,10 +396,11 @@ public class EduStudentServiceImpl implements IEduStudentService {
             String unionId = wxUserInfo.getString("unionid");
             // 获取微信用户是否关注公众号
             int subscribe = wxUserInfo.getInteger("subscribe");
-            // 获取二维码参数
+            // 获取二维码参数（学生ID作为参数）
             Long qr_scene = wxUserInfo.getLong("qr_scene");
+            System.out.println("获取二维码参数："+qr_scene);
 
-            // 根据微信用户unionId获取学员信息
+            // 根据学生ID获取学员信息（qr_scene，存放学生ID）
             EduStudent dbEduStudent = studentRepository.getReferenceById(qr_scene);
             // 更新学员信息
             if(dbEduStudent!=null){
@@ -446,6 +448,17 @@ public class EduStudentServiceImpl implements IEduStudentService {
                             // 结束时间
                             tempEduCouponGrantRecord.setAvailableEndTime(stock.getAvailableEndTime());
                             eduCouponGrantRecordRepository.save(tempEduCouponGrantRecord);
+
+                            // 发送微信模板信息
+                            try {
+                                weChatService.sendMsg(sendCouponResponse.getCouponId(),
+                                        stock.getStockId(),
+                                        fromUser,tempEduCouponGrantRecord.getAvailableBeginTime(),
+                                        tempEduCouponGrantRecord.getAvailableEndTime());
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+
                             break;
                         }
                     }
@@ -467,5 +480,20 @@ public class EduStudentServiceImpl implements IEduStudentService {
     @Override
     public EduStudent getByUnionid(String unionid) {
         return studentRepository.getByUnionId(unionid);
+    }
+
+    /**
+     *  根据优惠券编号获取学生的优惠券信息
+     * @param couponId
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStuCouponByCouponId(String couponId,String status) {
+        EduCouponGrantRecord dbEduCouponGrantRecord =  eduCouponGrantRecordRepository.findStuCouponByStuCouponId(couponId);
+        if (dbEduCouponGrantRecord!=null&&dbEduCouponGrantRecord.getStatus().equals("SENDED")&&status.equals("USED")){
+            dbEduCouponGrantRecord.setStatus(status);
+            eduCouponGrantRecordRepository.save(dbEduCouponGrantRecord);
+        }
     }
 }

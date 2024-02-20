@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +126,7 @@ public class WeChatService {
             data.addProperty("expire_seconds", 120);
             JsonObject scene = new JsonObject();
             scene.addProperty("scene_id", studentId);
+
             JsonObject actionInfo = new JsonObject();
             actionInfo.add("scene", scene);
             data.add("action_info", actionInfo);
@@ -148,7 +150,7 @@ public class WeChatService {
      * @param openId
      * @return
      */
-    public JSONObject sendMsg(String couponId,String storkId, String openId) {
+    public JSONObject sendMsg(String couponId,String storkId, String openId,String availableBeginTime,String availableEndTime) throws ParseException {
         String access_token = getAccessToken();
         if(access_token==null){
             return null;
@@ -156,20 +158,25 @@ public class WeChatService {
 
         String requestUrl = " https://api.weixin.qq.com/cgi-bin/message/template/send?access_token="  + access_token;
 
-        String templateId = "o9d_TbjQBZYK8jZa_q6o6wKAh0plqEsJ6uVAHuwsGyM";
+        String templateId = "qrU-CDEgSf5ejgQDJuM_VgPU5taZNDrT-tcwCpDx1yM";
         TemplateMessageDto templateMessageDto = new TemplateMessageDto();
         templateMessageDto.setTemplateId(templateId);
         templateMessageDto.setOpenid(openId);
         templateMessageDto.setUrl("http://www.xueden.cn/");
         Map<String, String> dataMap = new HashMap<String, String>();
-        dataMap.put("first", "恭喜领取满额减代金券成功，请注意查收！");
-        dataMap.put("keyword1", "会跳舞的雨");//昵称
-        dataMap.put("keyword2", "69584213");//代金券编号
-        dataMap.put("keyword3", "只能在学灯网使用");//代金券说明
-        dataMap.put("keyword4", DateUtil.changeDateTOStr(new Date()));// 领取时间
-        dataMap.put("remark", "学灯网满额减代金券");
+        // 优惠券编号
+        dataMap.put("character_string8", couponId);
+        // 领取数量
+        dataMap.put("character_string10", "1");
+        // 名称
+        dataMap.put("thing1", "领取成功,所属批次："+storkId);
+        // 生效时间
+        dataMap.put("time9", DateUtil.changeTStringTOStr(availableBeginTime));
+        // 到期时间
+        dataMap.put("time6", DateUtil.changeTStringTOStr(availableEndTime));
         templateMessageDto.setDataMap(dataMap);
-        String resp = HttpUtil.post(requestUrl,JSONObject.toJSONString(templateMessageDto));
+        String messageDto = templateMessageDto.toString();
+        String resp = HttpUtil.post(requestUrl,messageDto);
         JSONObject jsonObjectMsg = JSONObject.parseObject(resp);
         System.out.println("发送消息:" + jsonObjectMsg);
         return jsonObjectMsg;

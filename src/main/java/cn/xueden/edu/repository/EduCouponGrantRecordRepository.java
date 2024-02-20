@@ -18,4 +18,11 @@ public interface EduCouponGrantRecordRepository extends JpaRepository<EduCouponG
      * @return
      */
     Page<EduCouponGrantRecord> findListByStudentId(Long studentId, Pageable pageable);
+
+    /**
+     * 根据优惠券编号获取学生的优惠券信息
+     * @param couponId
+     * @return
+     */
+    EduCouponGrantRecord findStuCouponByStuCouponId(String couponId);
 }

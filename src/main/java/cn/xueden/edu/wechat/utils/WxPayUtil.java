@@ -10,11 +10,22 @@ import com.wechat.pay.java.service.payments.model.Transaction;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Base64Utils;
 
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**功能描述：处理微信支付回调通知
  * @author:梁志杰
@@ -98,5 +109,51 @@ public class WxPayUtil {
         }
 
     }
+
+
+    /**
+     * 用微信V3密钥解密响应体.
+     *
+     * @param associatedData  response.body.data[i].encrypt_certificate.associated_data
+     * @param nonce          response.body.data[i].encrypt_certificate.nonce
+     * @param ciphertext     response.body.data[i].encrypt_certificate.ciphertext
+     * @return the string
+     * @throws GeneralSecurityException the general security exception
+     */
+    public static String decryptResponseBody(String associatedData, String nonce, String ciphertext,
+                                             EduWxpay dbWxpay) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+            SecretKeySpec key = new SecretKeySpec(dbWxpay.getApiV3().getBytes(StandardCharsets.UTF_8), "AES");
+            GCMParameterSpec spec = new GCMParameterSpec(128, nonce.getBytes(StandardCharsets.UTF_8));
+
+            cipher.init(Cipher.DECRYPT_MODE, key, spec);
+            cipher.updateAAD(associatedData.getBytes(StandardCharsets.UTF_8));
+
+            byte[] bytes;
+            try {
+                bytes = cipher.doFinal(Base64Utils.decodeFromString(ciphertext));
+            } catch (GeneralSecurityException e) {
+                throw new IllegalArgumentException(e);
+            }
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new IllegalStateException(e);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Base64解密
+     * @param encodedText
+     * @return
+     */
+    public static String decodeBase64(String encodedText) {
+        byte[] decodedBytes = Base64.getDecoder().decode(encodedText.getBytes(StandardCharsets.UTF_8));
+        return new String(decodedBytes, StandardCharsets.UTF_8);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package cn.xueden.edu.service;
 
 import cn.xueden.base.BaseResult;
+import cn.xueden.edu.domain.EduCouponGrantRecord;
 import cn.xueden.edu.domain.EduStudent;
 
 import cn.xueden.edu.service.dto.EduStudentQueryCriteria;
@@ -151,4 +152,11 @@ public interface IEduStudentService {
      * @return
      */
     EduStudent getByUnionid(String unionid);
+
+    /**
+     * 根据优惠券编号更新学生的优惠券信息
+     * @param couponId
+     * @return
+     */
+    void updateStuCouponByCouponId(String couponId,String status);
 }
