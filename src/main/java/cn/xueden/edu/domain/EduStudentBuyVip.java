@@ -52,5 +52,20 @@ public class EduStudentBuyVip extends BaseEntity {
      */
     private String payChannel;
 
+    /**
+     * 微信支付平台内部生成的订单号
+     */
+    private String transactionId;
+
+    /**
+     * 代金券编号
+     */
+    private String couponId;
+
+    /**
+     * 代金券所属批次号
+     */
+    private String stockId;
+
 
 }

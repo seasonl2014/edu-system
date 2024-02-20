@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import com.wechat.pay.java.service.payments.model.PromotionDetail;
 import com.wechat.pay.java.service.payments.model.Transaction;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**功能描述：支付回调前端控制器
  * @author:梁志杰
@@ -81,11 +85,28 @@ public class EduPayController {
         log.info("购买VIP返回值{}",transaction.getTradeState().name());
         // 支付成功
         if("SUCCESS".equals(transaction.getTradeState().name())){
-            String Out_trade_no = transaction.getOutTradeNo();;
+            // 学灯网平台订单编号
+            String Out_trade_no = transaction.getOutTradeNo();
+            // 微信支付内部生成的订单号
+            String transactionId = transaction.getTransactionId();
             if(Out_trade_no!=null){
                 EduStudentBuyVip pay=studentBuyVipService.getOrderInfo(Out_trade_no);
                 if(pay!=null&&pay.getIsPayment()!=0){
                     return NotifyResult.create().success();
+                }
+                // 判断是否使用代金券购买
+                List<PromotionDetail> promotionDetailList = transaction.getPromotionDetail();
+                // 代金券金额(默认单位是分)
+                int couponAmount = 0;
+                // 代金券编号
+                String strCouponId = null;
+                // 代金券批次号
+                String strStockId = null;
+                // 使用代金券
+                if (promotionDetailList.size()>0){
+                    couponAmount = promotionDetailList.stream().mapToInt(PromotionDetail::getAmount).sum();
+                    strCouponId = promotionDetailList.stream().map(o-> (String)"'"+o.getCouponId()+"'").collect(Collectors.joining(","));
+                    strStockId = promotionDetailList.stream().map(o-> (String)"'"+o.getStockId()+"'").collect(Collectors.joining(","));
                 }
 
                 //获取成交金额记录
@@ -100,7 +121,16 @@ public class EduPayController {
                     eduDealMoney.setIsp(pay.getIsp());
                     eduDealMoney.setBuyType(1);
                     eduDealMoney.setStudentId(pay.getStudentId());
-                    eduDealMoney.setPrice(pay.getPrice());
+                    // 实际收入需要减去代金券金额
+                    if (couponAmount>0){
+                        // 先转换成元
+                        int tempAmount = couponAmount/100;
+                        BigDecimal tempAmountBigDecimal = new BigDecimal(tempAmount);
+                        eduDealMoney.setPrice(pay.getPrice().subtract(tempAmountBigDecimal));
+                    }else {
+                        eduDealMoney.setPrice(pay.getPrice());
+                    }
+
                     eduDealMoney.setCreateBy(pay.getStudentId());
                     eduDealMoney.setUpdateBy(pay.getStudentId());
                     eduDealMoney.setRemarks(pay.getRemarks());
@@ -108,8 +138,12 @@ public class EduPayController {
                     eduDealMoneyService.save(eduDealMoney);
                 }
 
-                //更新状态
-                pay.setIsPayment(1);//已付款
+                //更新状态，已付款
+                pay.setIsPayment(1);
+                // 微信支付订单编号
+                pay.setTransactionId(transactionId);
+                pay.setCouponId(strCouponId);
+                pay.setStockId(strStockId);
                 studentBuyVipService.updatePayment(pay);
                 try {
                     Map<String, Object> map = new HashMap<String, Object>();

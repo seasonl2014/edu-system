@@ -298,6 +298,17 @@ public class XuedenUtil {
 
     }
 
+    /**
+     * 把List转成以逗号分隔的字符串
+     * @param list
+     * @return
+     * @param <T>
+     */
+    private static <T> String parseListToStr(List<T> list){
+        String result = list.stream().map(o-> (String)"'"+o+"'").collect(Collectors.joining(","));
+        return result;
+    }
+
     public static void main(String[] args) throws IOException {
         //getMiddleDate(LocalDate.of(2023, 03, 10), LocalDate.now()).stream().forEach(System.out::println);
         // getCityInfo("180.137.111.52");
